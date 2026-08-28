@@ -188,6 +188,7 @@ window.examLock = ({
     },
     async saveAnswer(form) {
         if (!this.answerUrl) {
+            form.submit();
             return;
         }
 
@@ -204,6 +205,7 @@ window.examLock = ({
             });
 
             if (!response.ok) {
+                form.submit();
                 return;
             }
 
@@ -213,7 +215,7 @@ window.examLock = ({
             this.statusText = 'Jawaban tersimpan';
             this.markQuestionSaved(form);
         } catch (error) {
-            console.warn('Failed to autosave answer', error);
+            form.submit();
         }
     },
     markQuestionSaved(form) {
@@ -333,7 +335,8 @@ window.examRoom = ({
             });
         }
 
-        this.currentQuestionIndex = 0;
+        const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
+        this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
         this.updateTimerLabel();
 
         if (this.active && this.remainingSeconds > 0) {
@@ -455,10 +458,10 @@ window.examRoom = ({
             });
         });
     },
-    allQuestionsAnswered() {
-        return this.questions.length > 0 && this.answeredCount() === this.questions.length;
+    getFirstUnansweredQuestionIndex() {
+        return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
     },
-    async saveCurrentAnswer(form, questionIndex = this.currentQuestionIndex) {
+    async saveCurrentAnswer(form) {
         const formData = new FormData(form);
 
         try {
@@ -476,23 +479,17 @@ window.examRoom = ({
             }
 
             const payload = await response.json();
-            this.answeredQuestions = {
-                ...this.answeredQuestions,
-                [String(payload.question_id)]: Boolean(payload.answer),
-            };
+            this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
             this.markQuestionSaved(form);
-
-            const nextIndex = Math.min(questionIndex + 1, this.questions.length - 1);
-
-            if (nextIndex > questionIndex) {
-                this.setCurrentQuestion(nextIndex);
-            }
         } catch (error) {
             console.warn(error);
         }
     },
     async submitExam() {
-        if (!this.allQuestionsAnswered()) {
+        const firstUnansweredIndex = this.getFirstUnansweredQuestionIndex();
+
+        if (firstUnansweredIndex !== -1) {
+            this.setCurrentQuestion(firstUnansweredIndex);
             return;
         }
 

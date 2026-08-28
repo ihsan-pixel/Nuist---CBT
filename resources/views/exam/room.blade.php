@@ -30,7 +30,8 @@
                         });
                     }
 
-                    this.currentQuestionIndex = 0;
+                    const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
+                    this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
                     this.updateTimerLabel();
                 },
                 async verifySeb() {
@@ -145,10 +146,10 @@
                         });
                     });
                 },
-                allQuestionsAnswered() {
-                    return this.questions.length > 0 && this.answeredCount() === this.questions.length;
+                getFirstUnansweredQuestionIndex() {
+                    return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
                 },
-                async saveCurrentAnswer(form, questionIndex = this.currentQuestionIndex) {
+                async saveCurrentAnswer(form) {
                     const formData = new FormData(form);
 
                     try {
@@ -168,18 +169,15 @@
                         const payload = await response.json();
                         this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
                         this.markQuestionSaved(form);
-
-                        const nextIndex = Math.min(questionIndex + 1, this.questions.length - 1);
-
-                        if (nextIndex > questionIndex) {
-                            this.setCurrentQuestion(nextIndex);
-                        }
                     } catch (error) {
                         console.warn(error);
                     }
                 },
                 async submitExam() {
-                    if (!this.allQuestionsAnswered()) {
+                    const firstUnansweredIndex = this.getFirstUnansweredQuestionIndex();
+
+                    if (firstUnansweredIndex !== -1) {
+                        this.setCurrentQuestion(firstUnansweredIndex);
                         return;
                     }
 
@@ -387,23 +385,20 @@
                                                             class="text-sky-400 focus:ring-sky-500"
                                                             required
                                                             @checked($selectedAnswer === $option->option_label)
-                                                            @change="saveCurrentAnswer($event.currentTarget.closest('form'), {{ $loop->index }})"
+                                                            @change="saveCurrentAnswer($event.currentTarget.closest('form'))"
                                                         >
                                                         <span class="text-sm text-slate-700">{{ $option->option_label }}. {{ $option->option_text }}</span>
                                                     </label>
                                                 @endforeach
                                             </div>
-                    <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                        <p class="text-xs text-slate-500">Jawaban disimpan ke sesi ujian pengguna.</p>
-                        <x-primary-button
-                            type="button"
-                            @click="submitExam()"
-                            x-show="allQuestionsAnswered()"
-                            x-cloak
-                        >
-                            {{ __('Kirim Jawaban') }}
-                        </x-primary-button>
-                    </div>
+                                            <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <p class="text-xs text-slate-500">Jawaban disimpan ke sesi ujian pengguna.</p>
+                                                @if ($loop->last)
+                                                    <x-primary-button type="button" @click="submitExam()">
+                                                        {{ __('Kirim Jawaban') }}
+                                                    </x-primary-button>
+                                                @endif
+                                            </div>
                                         </form>
                                     </article>
                                 @endforeach
