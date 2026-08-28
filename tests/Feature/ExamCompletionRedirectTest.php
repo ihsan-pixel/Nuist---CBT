@@ -41,4 +41,15 @@ class ExamCompletionRedirectTest extends TestCase
         $response->assertSee('Ujian Selesai', false);
         $response->assertSee('Logout', false);
     }
+
+    public function test_logout_redirects_to_login_page(): void
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->post(route('logout'));
+
+        $response->assertRedirect(route('login'));
+    }
 }
