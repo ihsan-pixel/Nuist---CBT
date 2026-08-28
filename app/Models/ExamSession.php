@@ -52,4 +52,17 @@ class ExamSession extends Model
     {
         return $this->hasMany(ExamSessionQuestionSnapshot::class);
     }
+
+    /**
+     * Get the selected answers keyed by question ID.
+     *
+     * @return array<string, string|null>
+     */
+    public function getAnswersAttribute(): array
+    {
+        return $this->snapshots
+            ->pluck('selected_answer', 'exam_question_id')
+            ->mapWithKeys(fn ($answer, $questionId) => [(string) $questionId => $answer])
+            ->all();
+    }
 }
