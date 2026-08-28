@@ -305,6 +305,7 @@ window.examRoom = ({
     violationUrl = null,
     answerUrl = null,
     refreshUrl = null,
+    finishUrl = null,
 } = {}) => ({
     active,
     submitting,
@@ -319,6 +320,7 @@ window.examRoom = ({
     violationUrl,
     answerUrl,
     refreshUrl,
+    finishUrl,
     timerLabel: '--:--',
     timerHandle: null,
     init() {
@@ -456,6 +458,9 @@ window.examRoom = ({
             });
         });
     },
+    getFirstUnansweredQuestionIndex() {
+        return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
+    },
     async saveCurrentAnswer(form) {
         const formData = new FormData(form);
 
@@ -470,7 +475,6 @@ window.examRoom = ({
             });
 
             if (!response.ok) {
-                form.submit();
                 return;
             }
 
@@ -478,7 +482,33 @@ window.examRoom = ({
             this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
             this.markQuestionSaved(form);
         } catch (error) {
-            form.submit();
+            console.warn(error);
+        }
+    },
+    async submitExam() {
+        const firstUnansweredIndex = this.getFirstUnansweredQuestionIndex();
+
+        if (firstUnansweredIndex !== -1) {
+            this.setCurrentQuestion(firstUnansweredIndex);
+            return;
+        }
+
+        try {
+            const response = await fetch(this.finishUrl || '/exam/finish', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+            });
+
+            if (!response.ok && response.status !== 302) {
+                throw new Error('Failed to finish exam');
+            }
+
+            window.location.href = '/dashboard';
+        } catch (error) {
+            console.warn(error);
         }
     },
     markQuestionSaved(form) {
@@ -494,8 +524,9 @@ window.examRoom = ({
         }
     },
     updateTimerLabel() {
-        const minutes = Math.floor(this.remainingSeconds / 60);
-        const seconds = this.remainingSeconds % 60;
+        const totalSeconds = Math.max(0, Math.floor(Number(this.remainingSeconds ?? 0)));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
         this.timerLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     },
 });

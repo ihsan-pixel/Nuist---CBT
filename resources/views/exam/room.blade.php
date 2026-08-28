@@ -15,6 +15,7 @@
                 violationUrl: config.violationUrl || null,
                 answerUrl: config.answerUrl || null,
                 refreshUrl: config.refreshUrl || null,
+                finishUrl: config.finishUrl || null,
                 timerLabel: '--:--',
                 timerHandle: null,
                 init() {
@@ -145,6 +146,9 @@
                         });
                     });
                 },
+                getFirstUnansweredQuestionIndex() {
+                    return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
+                },
                 async saveCurrentAnswer(form) {
                     const formData = new FormData(form);
 
@@ -159,7 +163,6 @@
                         });
 
                         if (!response.ok) {
-                            form.submit();
                             return;
                         }
 
@@ -167,7 +170,33 @@
                         this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
                         this.markQuestionSaved(form);
                     } catch (error) {
-                        form.submit();
+                        console.warn(error);
+                    }
+                },
+                async submitExam() {
+                    const firstUnansweredIndex = this.getFirstUnansweredQuestionIndex();
+
+                    if (firstUnansweredIndex !== -1) {
+                        this.setCurrentQuestion(firstUnansweredIndex);
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(this.finishUrl || @js(route('exam.finish')), {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                                'Accept': 'application/json',
+                            },
+                        });
+
+                        if (!response.ok && response.status !== 302) {
+                            throw new Error('Failed to finish exam');
+                        }
+
+                        window.location.href = @js(route('dashboard'));
+                    } catch (error) {
+                        console.warn(error);
                     }
                 },
                 markQuestionSaved(form) {
@@ -211,6 +240,7 @@
             remainingSeconds: @js($remainingSeconds ?? 0),
             violationUrl: @js(route('exam.violation')),
             answerUrl: @js(route('exam.answer')),
+            finishUrl: @js(route('exam.finish')),
             refreshUrl: @js(route('exam.refresh-session')),
         })"
         x-init="init()"
@@ -336,7 +366,7 @@
                                             </span>
                                         </div>
 
-                                        <form method="POST" action="{{ route('exam.answer') }}" class="mt-6 space-y-4" data-autosave-form @submit.prevent="saveCurrentAnswer($event.currentTarget)">
+                                        <form method="POST" action="{{ route('exam.answer') }}" class="mt-6 space-y-4" data-autosave-form>
                                             @csrf
                                             <input type="hidden" name="question_id" value="{{ $question->id }}">
                                             <div class="grid gap-2">
@@ -349,6 +379,7 @@
                                                             class="text-sky-400 focus:ring-sky-500"
                                                             required
                                                             @checked($selectedAnswer === $option->option_label)
+                                                            @change="saveCurrentAnswer($event.currentTarget.closest('form'))"
                                                         >
                                                         <span class="text-sm text-slate-200">{{ $option->option_label }}. {{ $option->option_text }}</span>
                                                     </label>
@@ -356,9 +387,11 @@
                                             </div>
                                             <div class="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                                                 <p class="text-xs text-slate-400">Jawaban disimpan ke sesi ujian pengguna.</p>
-                                                <x-primary-button class="js-manual-save">
-                                                    {{ __('Simpan Jawaban') }}
-                                                </x-primary-button>
+                                                @if ($loop->last)
+                                                    <x-primary-button type="button" @click="submitExam()">
+                                                        {{ __('Kirim Jawaban') }}
+                                                    </x-primary-button>
+                                                @endif
                                             </div>
                                         </form>
                                     </article>
