@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class UserAdminController extends Controller
@@ -25,12 +24,13 @@ class UserAdminController extends Controller
         ]);
 
         $participantCode = $this->generateParticipantCode();
+        $password = $participantCode.'nuist';
 
         User::query()->create([
             'name' => $data['name'],
             'participant_code' => $participantCode,
             'email' => $participantCode.'@cbt.nuist.id',
-            'password' => Hash::make('password'),
+            'password' => $password,
             'role' => 'peserta',
             'email_verified_at' => now(),
         ]);

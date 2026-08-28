@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('access-admin', fn (User $user) => $user->role === UserRole::SuperAdmin);
         Gate::define('access-exam-panel', fn (User $user) => in_array(
             $user->role,
-            [UserRole::SuperAdmin, UserRole::Panitia],
+            [UserRole::SuperAdmin, UserRole::Peserta],
             true
         ));
 
