@@ -10,7 +10,11 @@
             init() {
                 this.sebDetected = Boolean(window.SafeExamBrowser?.version || window.SafeExamBrowser?.security);
                 if (this.sebRequired && this.sebDetected) {
-                    this.verifySeb();
+                    this.verifySeb().then(() => {
+                        if (this.sebVerified && !this.active) {
+                            this.beginExam();
+                        }
+                    });
                 }
             },
             async verifySeb() {
@@ -143,12 +147,12 @@
                     </div>
                 </div>
 
-                <div class="mt-8">
-                    <button
-                        type="button"
-                        @click="beginExam()"
-                        x-show="!sebRequired || sebDetected"
-                        class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-60"
+                    <div class="mt-8">
+                        <button
+                            type="button"
+                            @click="beginExam()"
+                            x-show="!sebRequired || sebDetected"
+                            class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-60"
                         :disabled="submitting"
                     >
                         <span x-show="!submitting">Mulai Ujian</span>
@@ -163,7 +167,7 @@
                     </div>
                     <div class="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-left text-sm text-emerald-50" x-show="sebDetected" x-cloak>
                         <p class="font-semibold">SEB terdeteksi</p>
-                        <p class="mt-1 leading-6">Anda dapat memulai ujian dalam mode aman.</p>
+                        <p class="mt-1 leading-6">Sistem akan memverifikasi browser lalu memulai sesi ujian otomatis.</p>
                     </div>
                     <div class="mt-4 rounded-2xl border border-slate-300 bg-slate-50 p-4 text-left text-sm text-slate-700" x-show="sebDetected" x-cloak>
                         <p class="font-semibold">Status verifikasi</p>

@@ -38,8 +38,8 @@
                     <a href="{{ route('exam.room') }}" class="mt-5 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
                         Masuk Ruang Ujian
                     </a>
-                    <a href="{{ route('exam.seb') }}" class="mt-3 inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">
-                        Buka dengan Safe Exam Browser
+                    <a href="{{ route('exam.start-seb') }}" class="mt-3 inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">
+                        Mulai dengan Safe Exam Browser
                     </a>
                     <a href="{{ route('exam.seb-config') }}" class="mt-3 inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                         Unduh Konfigurasi SEB
@@ -78,8 +78,8 @@
                         <a href="{{ route('exam.room') }}" class="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500">
                             Buka Ruang Ujian
                         </a>
-                        <a href="{{ route('exam.seb') }}" class="inline-flex items-center rounded-xl border border-emerald-300 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
-                            Mode SEB
+                        <a href="{{ route('exam.start-seb') }}" class="inline-flex items-center rounded-xl border border-emerald-300 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                            Start SEB
                         </a>
                         <a href="{{ route('exam.seb-config') }}" class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             Download SEB

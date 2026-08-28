@@ -27,7 +27,7 @@
                             Unduh Konfigurasi SEB
                         </a>
                         <a href="{{ $sebEntryUrl }}" class="inline-flex items-center rounded-2xl border border-emerald-300 px-5 py-3 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/10">
-                            Masuk ke Ujian
+                            Buka Ruang SEB
                         </a>
                     </div>
 
@@ -36,7 +36,7 @@
                         <ol class="mt-3 list-decimal space-y-2 pl-5">
                             <li>Unduh konfigurasi SEB lalu buka file tersebut dengan aplikasi Safe Exam Browser.</li>
                             <li>Pastikan aplikasi SEB menampilkan halaman ini, bukan browser biasa.</li>
-                            <li>Jika verifikasi berhasil, tombol masuk ujian akan tersedia.</li>
+                            <li>Setelah masuk ke ruang SEB, sistem akan memverifikasi browser dan menyiapkan sesi ujian.</li>
                         </ol>
                     </div>
                 </section>
