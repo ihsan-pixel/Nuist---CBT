@@ -9,6 +9,9 @@
             handshakeMessage: '',
             init() {
                 this.sebDetected = Boolean(window.SafeExamBrowser?.version || window.SafeExamBrowser?.security);
+                if (this.sebVerified) {
+                    this.sebDetected = true;
+                }
                 if (this.sebRequired && this.sebDetected) {
                     this.verifySeb().then(() => {
                         if (this.sebVerified && !this.active) {
@@ -64,7 +67,7 @@
             },
             async beginExam() {
                 if (this.submitting || this.active) return;
-                if (this.sebRequired && !this.sebDetected) {
+                if (this.sebRequired && !this.sebDetected && !this.sebVerified) {
                     alert('Mode Safe Exam Browser wajib dibuka lewat aplikasi SEB, bukan browser biasa.');
                     return;
                 }
@@ -152,7 +155,7 @@
                         type="button"
                         @click="beginExam()"
                         class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-60"
-                        :disabled="submitting || (sebRequired && !sebDetected)"
+                        :disabled="submitting || (sebRequired && !sebDetected && !sebVerified)"
                     >
                         <span x-show="!submitting" x-cloak>Mulai Ujian</span>
                         <span x-show="submitting" x-cloak>Memulai...</span>
