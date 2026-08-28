@@ -212,10 +212,15 @@ class ExamAdminController extends Controller
             ->map(function (ExamSession $session) use ($exam) {
                 $total = $exam->questions->count();
                 $correct = 0;
+                $answered = 0;
 
                 foreach ($exam->questions as $question) {
                     $selected = data_get($session->answers, (string) $question->id);
                     $correctOption = $question->options->firstWhere('is_correct', true);
+
+                    if (filled($selected)) {
+                        $answered++;
+                    }
 
                     if ($correctOption && $selected === $correctOption->option_label) {
                         $correct++;
@@ -226,6 +231,8 @@ class ExamAdminController extends Controller
                     'session' => $session,
                     'score' => $total > 0 ? round(($correct / $total) * 100, 2) : 0,
                     'correct' => $correct,
+                    'answered' => $answered,
+                    'unanswered' => max(0, $total - $answered),
                     'total' => $total,
                 ];
             });
@@ -245,6 +252,34 @@ class ExamAdminController extends Controller
             ->with('user')
             ->latest('finished_at')
             ->get();
+
+        $sessions = $sessions->map(function (ExamSession $session) use ($exam): array {
+            $total = $exam->questions->count();
+            $correct = 0;
+            $answered = 0;
+
+            foreach ($exam->questions as $question) {
+                $selected = data_get($session->answers, (string) $question->id);
+                $correctOption = $question->options->firstWhere('is_correct', true);
+
+                if (filled($selected)) {
+                    $answered++;
+                }
+
+                if ($correctOption && $selected === $correctOption->option_label) {
+                    $correct++;
+                }
+            }
+
+            return [
+                'session' => $session,
+                'score' => $total > 0 ? round(($correct / $total) * 100, 2) : 0,
+                'correct' => $correct,
+                'answered' => $answered,
+                'unanswered' => max(0, $total - $answered),
+                'total' => $total,
+            ];
+        });
 
         $filename = 'hasil-ujian-'.str($exam->title)->slug('-').'-'.now()->format('Ymd_His').'.csv';
 
