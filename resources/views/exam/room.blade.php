@@ -450,7 +450,7 @@
                                                     data-index="{{ $loop->index }}"
                                                     x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
                                                     class="flex aspect-square w-full min-w-0 items-center justify-center rounded-lg border text-[11px] font-semibold transition"
-                                                    x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-100 text-sky-800 shadow-sm' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-sky-300 hover:bg-sky-50')"
+                                                    x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-amber-300 bg-amber-100 text-amber-900 shadow-sm' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-amber-300 hover:bg-amber-50')"
                                                 >
                                                     {{ $loop->iteration }}
                                                 </button>
