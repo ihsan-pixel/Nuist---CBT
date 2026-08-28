@@ -435,20 +435,22 @@
                                 </div>
 
                                 <div class="px-4 py-4 sm:px-5">
-                                    <div class="grid grid-cols-10 gap-2">
-                                        @foreach ($questions as $question)
-                                            <button
-                                                type="button"
-                                                @click="setCurrentQuestion({{ $loop->index }})"
-                                                data-question-indicator
-                                                data-index="{{ $loop->index }}"
-                                                x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
-                                                class="flex h-8 w-8 items-center justify-center rounded-lg border text-[10px] font-semibold transition sm:h-9 sm:w-9"
-                                                x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-100 text-sky-800 shadow-sm' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-sky-300 hover:bg-sky-50')"
-                                            >
-                                                {{ $loop->iteration }}
-                                            </button>
-                                        @endforeach
+                                    <div class="overflow-x-auto pb-1">
+                                        <div class="grid min-w-max grid-flow-col auto-cols-[2rem] gap-2 sm:auto-cols-[2.125rem] lg:auto-cols-[2.25rem]">
+                                            @foreach ($questions as $question)
+                                                <button
+                                                    type="button"
+                                                    @click="setCurrentQuestion({{ $loop->index }})"
+                                                    data-question-indicator
+                                                    data-index="{{ $loop->index }}"
+                                                    x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
+                                                    class="flex h-8 w-8 items-center justify-center rounded-lg border text-[11px] font-semibold transition sm:h-8 sm:w-8"
+                                                    x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-100 text-sky-800 shadow-sm' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-sky-300 hover:bg-sky-50')"
+                                                >
+                                                    {{ $loop->iteration }}
+                                                </button>
+                                            @endforeach
+                                        </div>
                                     </div>
 
                                     <div class="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
