@@ -6,9 +6,9 @@
                 <h2 class="mt-2 text-2xl font-semibold leading-tight text-slate-900 sm:text-3xl">
                     Selamat datang, {{ $user->name }}
                 </h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                {{-- <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                     Kelola ujian, peserta, dan keamanan SEB dalam satu dashboard yang ringkas dan mudah dipindai.
-                </p>
+                </p> --}}
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
@@ -67,11 +67,11 @@
                                 </div>
                             </div>
 
-                            <div class="mt-5">
+                            {{-- <div class="mt-5">
                                 <a href="{{ route('profile.edit') }}" class="inline-flex items-center rounded-xl border border-emerald-300 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
                                     Edit Profil
                                 </a>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </article>
@@ -129,7 +129,7 @@
                 </article>
             </section>
 
-            <section class="mt-6 grid gap-4 lg:grid-cols-[1.3fr_0.9fr]">
+            <section class="mt-6 grid gap-4 lg:grid-cols-2">
                 <article class="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm">
                     <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
                         <div class="flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
@@ -197,37 +197,5 @@
                 </article>
             </section>
         </div>
-
-        <footer class="border-t border-emerald-900/10 bg-emerald-950 text-emerald-50">
-            <div class="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_1fr_1fr] lg:px-8">
-                <div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                            <x-application-logo class="h-8 w-8 fill-current text-white" />
-                        </div>
-                        <div>
-                            <p class="text-lg font-semibold">NUIST CBT</p>
-                            <p class="text-sm text-emerald-100/80">Sistem Ujian Berbasis Komputer LP Ma'arif NU DIY</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-100/70">Tautan Cepat</p>
-                    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-emerald-100">
-                        <a href="{{ route('exam.start-seb') }}" class="hover:text-white">Panduan Ujian</a>
-                        <span class="text-emerald-100/40">|</span>
-                        <a href="{{ route('profile.edit') }}" class="hover:text-white">Bantuan</a>
-                        <span class="text-emerald-100/40">|</span>
-                        <a href="{{ route('dashboard') }}" class="hover:text-white">Dashboard</a>
-                    </div>
-                </div>
-
-                <div class="text-sm text-emerald-100/90 lg:text-right">
-                    <p>© {{ now()->year }} LP Ma'arif NU PWNU DIY</p>
-                    <p class="mt-2">Versi {{ $appVersion }}</p>
-                </div>
-            </div>
-        </footer>
     </div>
 </x-app-layout>
