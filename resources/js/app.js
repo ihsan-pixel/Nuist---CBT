@@ -337,14 +337,32 @@ window.examRoom = ({
 
         const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
         this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
+        this.syncTimerFromEndsAt();
         this.updateTimerLabel();
 
-        if (this.active && this.remainingSeconds > 0) {
+        if (this.active && this.endsAt && this.remainingSeconds > 0) {
             this.timerHandle = window.setInterval(() => {
-                this.remainingSeconds = Math.max(0, this.remainingSeconds - 1);
-                this.updateTimerLabel();
+                this.syncTimerFromEndsAt();
+
+                if (this.remainingSeconds === 0) {
+                    this.autoFinish?.();
+                }
             }, 1000);
         }
+    },
+    syncTimerFromEndsAt() {
+        if (!this.endsAt) {
+            return;
+        }
+
+        const endTime = Date.parse(this.endsAt);
+
+        if (Number.isNaN(endTime)) {
+            return;
+        }
+
+        this.remainingSeconds = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+        this.updateTimerLabel();
     },
     async verifySeb() {
         if (!window.SafeExamBrowser?.security) {
@@ -420,6 +438,13 @@ window.examRoom = ({
         } catch (error) {
             console.warn(error);
             this.submitting = false;
+        }
+    },
+    autoFinish() {
+        const form = document.getElementById('exam-heartbeat-form');
+
+        if (form) {
+            form.submit();
         }
     },
     setCurrentQuestion(index) {
