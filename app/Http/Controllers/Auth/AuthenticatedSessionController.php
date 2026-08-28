@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
 
         if ($user?->role === UserRole::Peserta) {
-            return redirect()->intended(route('exam.room', absolute: false));
+            return redirect()->intended(route('exam.start-seb', absolute: false));
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

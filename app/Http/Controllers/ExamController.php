@@ -110,18 +110,14 @@ class ExamController extends Controller
     public function startSeb(Request $request): View
     {
         $exam = Exam::query()
-            ->with(['questions.options' => fn ($query) => $query->orderBy('option_label')])
             ->where('is_active', true)
             ->orderBy('id')
             ->first();
 
         abort_unless($exam, 404, 'Belum ada ujian aktif.');
 
-        $session = $this->currentSession($request, $exam);
-
         return view('exam.start-seb', [
             'exam' => $exam,
-            'session' => $session,
             'sebVerified' => (bool) $request->session()->get('seb.verified'),
             'sebDetected' => (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified')),
             'configDownloadUrl' => route('exam.seb-config'),
