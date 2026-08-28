@@ -375,7 +375,7 @@
                         </div>
                     </main>
 
-                    <aside class="w-full lg:sticky lg:top-4 lg:w-[240px] lg:shrink-0">
+                    <aside class="w-full lg:sticky lg:top-4 lg:w-[500px] lg:shrink-0">
                         <div class="space-y-4">
                             <div class="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                                 <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Indikator Soal</p>
