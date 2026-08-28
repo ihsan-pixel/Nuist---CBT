@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Exam;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -30,6 +32,28 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    public function test_peserta_logged_in_from_seb_is_redirected_to_exam_room(): void
+    {
+        $user = User::factory()->create();
+
+        Exam::query()->create([
+            'title' => 'CBT Demo',
+            'description' => 'Ujian contoh.',
+            'duration_minutes' => 60,
+            'is_active' => true,
+        ]);
+
+        Session::put('seb.verified', true);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('exam.room', absolute: false));
+    }
+
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
@@ -49,6 +73,6 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post('/logout');
 
         $this->assertGuest();
-        $response->assertRedirect('/');
+        $response->assertRedirect(route('login'));
     }
 }

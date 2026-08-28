@@ -20,11 +20,7 @@ class ExamController extends Controller
 
     public function room(Request $request): View|RedirectResponse
     {
-        $exam = Exam::query()
-            ->with(['questions.options' => fn ($query) => $query->orderBy('option_label')])
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->first();
+        $exam = $this->activeExam(withQuestions: true);
 
         abort_unless($exam, 404, 'Belum ada ujian aktif.');
 
@@ -70,11 +66,7 @@ class ExamController extends Controller
 
     public function seb(Request $request): View|RedirectResponse
     {
-        $exam = Exam::query()
-            ->with(['questions.options' => fn ($query) => $query->orderBy('option_label')])
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->first();
+        $exam = $this->activeExam(withQuestions: true);
 
         abort_unless($exam, 404, 'Belum ada ujian aktif.');
 
@@ -119,11 +111,7 @@ class ExamController extends Controller
 
     public function startSeb(Request $request): View
     {
-        $exam = Exam::query()
-            ->with(['questions.options' => fn ($query) => $query->orderBy('option_label')])
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->first();
+        $exam = $this->activeExam();
 
         abort_unless($exam, 404, 'Belum ada ujian aktif.');
 
@@ -238,25 +226,6 @@ class ExamController extends Controller
                     'is_locked' => true,
                 ]
             );
-
-            $session->snapshots()->delete();
-
-            foreach ($exam->questions()->with('options')->orderBy('sort_order')->get() as $question) {
-                $session->snapshots()->create([
-                    'exam_question_id' => $question->id,
-                    'sort_order' => $question->sort_order,
-                    'question_text' => $question->question_text,
-                    'option_snapshot' => $question->options
-                        ->sortBy('option_label')
-                        ->values()
-                        ->map(fn ($option) => [
-                            'option_label' => $option->option_label,
-                            'option_text' => $option->option_text,
-                        ])
-                        ->all(),
-                    'selected_answer' => null,
-                ]);
-            }
         });
 
         $request->session()->put('exam.active', true);
@@ -273,7 +242,7 @@ class ExamController extends Controller
             'answer' => ['required', 'string', 'max:255'],
         ]);
 
-        $exam = Exam::query()->where('is_active', true)->firstOrFail();
+        $exam = $this->activeExam();
         $session = $this->currentSession($request, $exam);
 
         abort_unless($session && $session->is_locked && ! $session->finished_at, 403, 'Sesi ujian tidak aktif.');
@@ -295,7 +264,7 @@ class ExamController extends Controller
 
     public function finish(Request $request): RedirectResponse
     {
-        $exam = Exam::query()->where('is_active', true)->first();
+        $exam = $this->activeExam();
 
         if ($exam) {
             $session = $this->currentSession($request, $exam);
@@ -340,7 +309,7 @@ class ExamController extends Controller
 
     public function heartbeat(Request $request): RedirectResponse
     {
-        $exam = Exam::query()->where('is_active', true)->firstOrFail();
+        $exam = $this->activeExam();
         $session = $this->currentSession($request, $exam);
 
         if (! $session || $session->finished_at) {
@@ -358,7 +327,7 @@ class ExamController extends Controller
 
     public function refreshSession(Request $request): RedirectResponse
     {
-        $exam = Exam::query()->where('is_active', true)->firstOrFail();
+        $exam = $this->activeExam();
         $session = $this->currentSession($request, $exam);
 
         abort_unless($session && $session->is_locked && ! $session->finished_at, 403, 'Sesi ujian tidak aktif.');
@@ -374,7 +343,7 @@ class ExamController extends Controller
             'meta' => ['nullable', 'array'],
         ]);
 
-        $exam = Exam::query()->where('is_active', true)->firstOrFail();
+        $exam = $this->activeExam();
         $session = $this->currentSession($request, $exam);
 
         abort_unless($session && $session->is_locked && ! $session->finished_at, 403, 'Sesi ujian tidak aktif.');
@@ -429,6 +398,17 @@ class ExamController extends Controller
             ->first();
     }
 
+    private function activeExam(bool $withQuestions = false): Exam
+    {
+        $query = Exam::query()->where('is_active', true)->orderBy('id');
+
+        if ($withQuestions) {
+            $query->with(['questions.options' => fn ($query) => $query->orderBy('option_label')]);
+        }
+
+        return $query->firstOrFail();
+    }
+
     private function startPendingSession(ExamSession $session, Exam $exam): ExamSession
     {
         DB::transaction(function () use ($session, $exam) {
@@ -443,7 +423,7 @@ class ExamController extends Controller
                 return;
             }
 
-            $exam->loadMissing('questions.options');
+            $exam->loadMissing(['questions.options' => fn ($query) => $query->orderBy('option_label')]);
 
             foreach ($exam->questions->sortBy('sort_order') as $question) {
                 $session->snapshots()->create([

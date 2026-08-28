@@ -51,6 +51,7 @@ class ExamTimerStartsInRoomTest extends TestCase
 
         $this->assertNull($pendingSession->started_at);
         $this->assertNull($pendingSession->expires_at);
+        $this->assertSame(0, $pendingSession->snapshots()->count());
 
         $roomResponse = $this->actingAs($user)->get(route('exam.room'));
 
@@ -61,6 +62,12 @@ class ExamTimerStartsInRoomTest extends TestCase
 
         $this->assertSame('2026-08-28 10:00:00', $startedSession->started_at?->format('Y-m-d H:i:s'));
         $this->assertSame('2026-08-28 11:00:00', $startedSession->expires_at?->format('Y-m-d H:i:s'));
+        $this->assertSame(1, $startedSession->snapshots()->count());
+
+        $this->actingAs($user)->get(route('exam.room'));
+
+        $reloadedSession = ExamSession::query()->where('user_id', $user->id)->where('exam_id', $exam->id)->firstOrFail();
+        $this->assertSame(1, $reloadedSession->snapshots()->count());
 
         Carbon::setTestNow();
     }

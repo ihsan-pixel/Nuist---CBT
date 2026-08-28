@@ -28,7 +28,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $target = $this->redirectTarget($request);
+
+        return redirect()->intended($target);
     }
 
     /**
@@ -43,5 +45,14 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    private function redirectTarget(Request $request): string
+    {
+        if ($request->session()->get('seb.verified') || $request->header('X-SafeExamBrowser-ConfigKeyHash')) {
+            return route('exam.room', absolute: false);
+        }
+
+        return route('dashboard', absolute: false);
     }
 }
