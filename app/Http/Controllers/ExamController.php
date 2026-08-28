@@ -17,7 +17,7 @@ class ExamController extends Controller
 {
     private const VIOLATION_LIMIT = 3;
 
-    public function room(Request $request): View
+    public function room(Request $request): View|RedirectResponse
     {
         $exam = Exam::query()
             ->with(['questions.options' => fn ($query) => $query->orderBy('option_label')])
@@ -27,12 +27,18 @@ class ExamController extends Controller
 
         abort_unless($exam, 404, 'Belum ada ujian aktif.');
 
+        if ($this->hasSubmittedSession($request, $exam)) {
+            return redirect()
+                ->route('exam.completed')
+                ->with('status', 'Anda sudah menyelesaikan ujian ini dan jawaban tersimpan.');
+        }
+
         $session = $this->currentSession($request, $exam);
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
-        $hasSubmittedAnswers = (bool) ($session?->finished_at && $session->snapshots()->whereNotNull('selected_answer')->exists());
+        $hasSubmittedAnswers = $this->hasSubmittedSession($request, $exam);
 
         return view('exam.room', [
             'exam' => $exam,
@@ -54,7 +60,7 @@ class ExamController extends Controller
         ]);
     }
 
-    public function seb(Request $request): View
+    public function seb(Request $request): View|RedirectResponse
     {
         $exam = Exam::query()
             ->with(['questions.options' => fn ($query) => $query->orderBy('option_label')])
@@ -64,12 +70,18 @@ class ExamController extends Controller
 
         abort_unless($exam, 404, 'Belum ada ujian aktif.');
 
+        if ($this->hasSubmittedSession($request, $exam)) {
+            return redirect()
+                ->route('exam.completed')
+                ->with('status', 'Anda sudah menyelesaikan ujian ini dan jawaban tersimpan.');
+        }
+
         $session = $this->currentSession($request, $exam);
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
-        $hasSubmittedAnswers = (bool) ($session?->finished_at && $session->snapshots()->whereNotNull('selected_answer')->exists());
+        $hasSubmittedAnswers = $this->hasSubmittedSession($request, $exam);
 
         return view('exam.room', [
             'exam' => $exam,
@@ -179,6 +191,12 @@ class ExamController extends Controller
     public function start(Request $request): RedirectResponse
     {
         $exam = Exam::query()->where('is_active', true)->orderBy('id')->firstOrFail();
+        if ($this->hasSubmittedSession($request, $exam)) {
+            return redirect()
+                ->route('exam.completed')
+                ->with('status', 'Anda sudah menyelesaikan ujian ini dan jawaban tersimpan.');
+        }
+
         $session = $this->currentSession($request, $exam);
 
         if ($session && $session->finished_at && $session->snapshots()->whereNotNull('selected_answer')->exists()) {
@@ -391,7 +409,18 @@ class ExamController extends Controller
             ->with('snapshots')
             ->where('user_id', $request->user()->id)
             ->where('exam_id', $exam->id)
+            ->latest('id')
             ->first();
+    }
+
+    private function hasSubmittedSession(Request $request, Exam $exam): bool
+    {
+        return ExamSession::query()
+            ->where('user_id', $request->user()->id)
+            ->where('exam_id', $exam->id)
+            ->whereNotNull('finished_at')
+            ->whereHas('snapshots', fn ($query) => $query->whereNotNull('selected_answer'))
+            ->exists();
     }
 
     private function sebStatusSummary(Request $request, ?Exam $exam = null): array
