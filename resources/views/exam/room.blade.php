@@ -7,9 +7,21 @@
             sebRequired: @js(! empty($sebMode)),
             sebVerified: @js((bool) ($sebVerified ?? false)),
             handshakeMessage: '',
+            currentQuestionIndex: 0,
+            answeredQuestions: @js(collect($savedAnswers)->map(fn ($answer) => filled($answer))->all()),
+            questions: @js($questions->map(fn ($question) => [
+                'id' => $question->id,
+                'sort_order' => $question->sort_order,
+                'question_text' => $question->question_text,
+                'options' => $question->options->map(fn ($option) => [
+                    'option_label' => $option->option_label,
+                    'option_text' => $option->option_text,
+                ])->values(),
+            ])->values()),
             init() {
                 const sebApiDetected = Boolean(window.SafeExamBrowser?.version || window.SafeExamBrowser?.security);
                 this.sebDetected = this.sebDetected || sebApiDetected;
+
                 if (this.sebRequired && this.sebDetected) {
                     this.verifySeb().then(() => {
                         if (this.sebVerified && !this.active) {
@@ -17,6 +29,9 @@
                         }
                     });
                 }
+
+                const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
+                this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
             },
             async verifySeb() {
                 if (!window.SafeExamBrowser?.security) {
@@ -64,13 +79,12 @@
                 }
             },
             async beginExam() {
-                if (this.submitting || this.active) return;
-                if (this.sebRequired && !this.sebDetected && !this.sebVerified) {
-                    alert('Mode Safe Exam Browser wajib dibuka lewat aplikasi SEB, bukan browser biasa.');
+                if (this.submitting || this.active) {
                     return;
                 }
+
                 if (this.sebRequired && !this.sebDetected && !this.sebVerified) {
-                    alert('Verifikasi SEB belum selesai.');
+                    alert('Mode Safe Exam Browser wajib dibuka lewat aplikasi SEB, bukan browser biasa.');
                     return;
                 }
 
@@ -78,6 +92,7 @@
 
                 const requestFullscreen = async () => {
                     const target = document.documentElement;
+
                     try {
                         if (target.requestFullscreen) {
                             await target.requestFullscreen({ navigationUI: 'hide' });
@@ -118,21 +133,40 @@
                     this.submitting = false;
                 }
             },
+            setCurrentQuestion(index) {
+                if (index < 0 || index >= this.questions.length) {
+                    return;
+                }
+
+                this.currentQuestionIndex = index;
+                this.scrollToCurrentQuestion();
+            },
+            nextQuestion() {
+                if (this.currentQuestionIndex < this.questions.length - 1) {
+                    this.currentQuestionIndex += 1;
+                    this.scrollToCurrentQuestion();
+                }
+            },
+            previousQuestion() {
+                if (this.currentQuestionIndex > 0) {
+                    this.currentQuestionIndex -= 1;
+                    this.scrollToCurrentQuestion();
+                }
+            },
+            scrollToCurrentQuestion() {
+                this.$nextTick(() => {
+                    const currentCard = this.$root.querySelector(`[data-question-card="${this.questions[this.currentQuestionIndex]?.id}"]`);
+
+                    currentCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            },
+            markAnswered(questionId, answer) {
+                this.answeredQuestions[String(questionId)] = Boolean(answer);
+            },
         }"
     >
-        @if (! empty($sebMode))
-            <div class="border-b border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-                <div class="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="font-medium">Mode Safe Exam Browser aktif. Halaman ini harus dibuka dari aplikasi SEB, bukan browser biasa.</p>
-                    <a href="https://safeexambrowser.org/start/" target="_blank" rel="noreferrer" class="font-semibold text-emerald-200 underline decoration-emerald-200/60 underline-offset-4">
-                        Panduan resmi SEB
-                    </a>
-                </div>
-            </div>
-        @endif
-
-                <main x-show="!active" class="flex min-h-screen items-center justify-center px-4 py-10">
-                    <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
+        <main x-show="!active" class="flex min-h-screen items-center justify-center px-4 py-10">
+            <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
                 <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-300">Ruang Ujian</p>
                 <h1 class="mt-4 text-3xl font-bold text-white sm:text-4xl">{{ $exam->title }}</h1>
                 <p class="mt-3 text-sm leading-6 text-slate-300">{{ $exam->description }}</p>
@@ -180,6 +214,7 @@
                 @endif
             </div>
         </main>
+
         <template x-if="active">
             <div
                 class="min-h-screen bg-slate-950 text-white"
@@ -200,112 +235,128 @@
                     @csrf
                 </form>
 
-                <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Mode Ujian Aktif</p>
-                                <h2 class="mt-2 text-2xl font-bold text-white">{{ $exam->title }}</h2>
-                                <p class="mt-1 text-sm text-slate-300">{{ $exam->description }}</p>
-                                @if (! empty($sebMode))
-                                    <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300">Safe Exam Browser Mode</p>
-                                @endif
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <div class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950" x-text="timerLabel"></div>
-                                <form method="POST" action="{{ route('exam.finish') }}">
-                                    @csrf
-                                    <x-secondary-button type="submit">
-                                        {{ __('Selesai Ujian') }}
-                                    </x-secondary-button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                @if (session('status'))
-                    <div class="mx-auto mt-2 max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                            {{ session('status') }}
-                        </div>
-                    </div>
-                @endif
-
-                <div class="mx-auto grid max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(300px,0.8fr)] lg:px-8">
-                    <section class="space-y-4">
-                        @foreach ($questions as $question)
-                            @php
-                                $selectedAnswer = data_get($savedAnswers, $question->id);
-                            @endphp
-                            <article class="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-                                <div class="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-sky-300">Soal {{ $question->sort_order }}</p>
-                                        <h3 class="mt-2 text-lg font-semibold text-white">{{ $question->question_text }}</h3>
-                                    </div>
-                                    <span data-answer-status class="rounded-full px-3 py-1 text-xs font-medium {{ $selectedAnswer ? 'bg-emerald-400/20 text-emerald-200' : 'bg-white/10 text-slate-300' }}">
-                                        {{ $selectedAnswer ? 'Tersimpan' : 'Belum dijawab' }}
-                                    </span>
+                <div class="mx-auto flex min-h-screen max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:px-8">
+                    <main class="flex min-w-0 flex-1 flex-col gap-6">
+                        <div class="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="min-w-0">
+                                    <h2 class="truncate text-xl font-semibold text-white sm:text-2xl">{{ $exam->title }}</h2>
                                 </div>
-
-                                <form method="POST" action="{{ route('exam.answer') }}" class="mt-5 space-y-3" data-autosave-form>
-                                    @csrf
-                                    <input type="hidden" name="question_id" value="{{ $question->id }}">
-                                    <div class="grid gap-2">
-                                        @foreach ($question->options as $option)
-                                            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-black/20 px-4 py-3 transition hover:border-sky-300/50 hover:bg-white/10">
-                                                <input
-                                                    type="radio"
-                                                    name="answer"
-                                                    value="{{ $option->option_label }}"
-                                                    class="text-sky-400 focus:ring-sky-500"
-                                                    required
-                                                    @checked($selectedAnswer === $option->option_label)
-                                                >
-                                                <span class="text-sm text-slate-200">{{ $option->option_label }}. {{ $option->option_text }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    <div class="flex items-center justify-between gap-4">
-                                        <p class="text-xs text-slate-400">Jawaban disimpan ke sesi ujian pengguna.</p>
-                                        <x-primary-button class="js-manual-save">
-                                            {{ __('Simpan Jawaban') }}
-                                        </x-primary-button>
-                                    </div>
-                                </form>
-                            </article>
-                        @endforeach
-                    </section>
-
-                    <aside class="space-y-4">
-                        <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
-                            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Status Sesi</p>
-                            <div class="mt-4 space-y-3 text-sm text-slate-200">
-                                <div class="flex items-center justify-between gap-3">
-                                    <span>Fullscreen</span>
-                                    <span x-text="fullscreenState"></span>
-                                </div>
-                                <div class="flex items-center justify-between gap-3">
-                                    <span>Tab aktif</span>
-                                    <span x-text="focusState"></span>
-                                </div>
-                                <div class="flex items-center justify-between gap-3">
-                                    <span>Soal tersimpan</span>
-                                    <span>{{ $session ? $session->snapshots->whereNotNull('selected_answer')->count() : 0 }}</span>
-                                </div>
-                                <div class="flex items-center justify-between gap-3">
-                                    <span>Pelanggaran</span>
-                                    <span>{{ $warningCount }}</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="rounded-full border border-white/10 bg-slate-900 px-4 py-2 text-sm font-semibold text-white" x-text="timerLabel"></div>
+                                    <form method="POST" action="{{ route('exam.finish') }}">
+                                        @csrf
+                                        <x-secondary-button type="submit">
+                                            {{ __('Selesai Ujian') }}
+                                        </x-secondary-button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5 text-amber-50">
-                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-amber-200">Catatan</p>
-                            <p class="mt-3 text-sm leading-6 text-amber-50/90">
-                                Keluar tab, refresh, dan shortcut umum dipantau. Untuk penguncian yang lebih ketat, gunakan kiosk mode atau aplikasi pengawas khusus.
-                            </p>
+                        <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                            <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Soal</p>
+                                    <p class="mt-2 text-sm text-slate-300">Pilih satu soal, jawab, lalu pindah ke soal berikutnya atau sebelumnya.</p>
+                                </div>
+                                <div class="text-sm text-slate-300">
+                                    <span x-text="currentQuestionIndex + 1"></span>/<span x-text="questions.length"></span>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 space-y-4">
+                                @foreach ($questions as $question)
+                                    @php
+                                        $selectedAnswer = data_get($savedAnswers, $question->id);
+                                    @endphp
+                                    <article
+                                        data-question-card="{{ $question->id }}"
+                                        x-show="currentQuestionIndex === {{ $loop->index }}"
+                                        x-cloak
+                                        class="rounded-2xl border border-white/10 bg-slate-900/60 p-5"
+                                    >
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div>
+                                                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-sky-300">Soal {{ $question->sort_order }}</p>
+                                                <h3 class="mt-3 text-lg font-semibold leading-8 text-white">{{ $question->question_text }}</h3>
+                                            </div>
+                                            <span data-answer-status class="rounded-full px-3 py-1 text-xs font-medium {{ $selectedAnswer ? 'bg-emerald-400/20 text-emerald-200' : 'bg-white/10 text-slate-300' }}">
+                                                {{ $selectedAnswer ? 'Tersimpan' : 'Belum dijawab' }}
+                                            </span>
+                                        </div>
+
+                                        <form method="POST" action="{{ route('exam.answer') }}" class="mt-6 space-y-4" data-autosave-form @submit.prevent="saveAnswer($event.currentTarget)">
+                                            @csrf
+                                            <input type="hidden" name="question_id" value="{{ $question->id }}">
+                                            <div class="grid gap-2">
+                                                @foreach ($question->options as $option)
+                                                    <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 transition hover:border-sky-300/50 hover:bg-white/10">
+                                                        <input
+                                                            type="radio"
+                                                            name="answer"
+                                                            value="{{ $option->option_label }}"
+                                                            class="text-sky-400 focus:ring-sky-500"
+                                                            required
+                                                            @checked($selectedAnswer === $option->option_label)
+                                                        >
+                                                        <span class="text-sm text-slate-200">{{ $option->option_label }}. {{ $option->option_text }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                            <div class="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <p class="text-xs text-slate-400">Jawaban disimpan ke sesi ujian pengguna.</p>
+                                                <x-primary-button class="js-manual-save">
+                                                    {{ __('Simpan Jawaban') }}
+                                                </x-primary-button>
+                                            </div>
+                                        </form>
+                                    </article>
+                                @endforeach
+                            </div>
+
+                            <div class="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+                                <x-secondary-button type="button" @click="previousQuestion()" x-bind:disabled="currentQuestionIndex === 0">
+                                    Sebelumnya
+                                </x-secondary-button>
+                                <x-secondary-button type="button" @click="nextQuestion()" x-bind:disabled="currentQuestionIndex >= questions.length - 1">
+                                    Selanjutnya
+                                </x-secondary-button>
+                            </div>
+                        </div>
+                    </main>
+
+                    <aside class="hidden w-full max-w-xs shrink-0 lg:block">
+                        <div class="sticky top-4 space-y-4">
+                            <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                                <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Indikator Soal</p>
+                                <div class="mt-4 grid grid-cols-5 gap-2">
+                                    @foreach ($questions as $question)
+                                        <button
+                                            type="button"
+                                            @click="setCurrentQuestion({{ $loop->index }})"
+                                            class="flex h-11 items-center justify-center rounded-2xl border text-sm font-semibold transition"
+                                            x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-400/20 text-sky-100' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-400/15 text-emerald-100' : 'border-white/10 bg-black/20 text-slate-300 hover:border-sky-300/40 hover:bg-white/10')"
+                                        >
+                                            {{ $loop->iteration }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <div class="mt-4 space-y-2 text-xs text-slate-300">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-block h-3 w-3 rounded-full bg-emerald-400/70"></span>
+                                        <span>Sudah terjawab</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-block h-3 w-3 rounded-full bg-white/20"></span>
+                                        <span>Belum terjawab</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-block h-3 w-3 rounded-full bg-sky-400/70"></span>
+                                        <span>Soal aktif</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </aside>
                 </div>

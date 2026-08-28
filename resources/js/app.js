@@ -210,6 +210,7 @@ window.examLock = ({
 
             const payload = await response.json();
             this.savedAnswers[String(payload.question_id)] = payload.answer;
+            this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
             this.statusText = 'Jawaban tersimpan';
             this.markQuestionSaved(form);
         } catch (error) {
