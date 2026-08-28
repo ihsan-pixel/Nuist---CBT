@@ -148,7 +148,7 @@
                 allQuestionsAnswered() {
                     return this.questions.length > 0 && this.answeredCount() === this.questions.length;
                 },
-                async saveCurrentAnswer(form) {
+                async saveCurrentAnswer(form, questionIndex = this.currentQuestionIndex) {
                     const formData = new FormData(form);
 
                     try {
@@ -169,8 +169,10 @@
                         this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
                         this.markQuestionSaved(form);
 
-                        if (this.currentQuestionIndex < this.questions.length - 1) {
-                            this.nextQuestion();
+                        const nextIndex = Math.min(questionIndex + 1, this.questions.length - 1);
+
+                        if (nextIndex > questionIndex) {
+                            this.setCurrentQuestion(nextIndex);
                         }
                     } catch (error) {
                         console.warn(error);
@@ -385,7 +387,7 @@
                                                             class="text-sky-400 focus:ring-sky-500"
                                                             required
                                                             @checked($selectedAnswer === $option->option_label)
-                                                            @change="saveCurrentAnswer($event.currentTarget.closest('form'))"
+                                                            @change="saveCurrentAnswer($event.currentTarget.closest('form'), {{ $loop->index }})"
                                                         >
                                                         <span class="text-sm text-slate-700">{{ $option->option_label }}. {{ $option->option_text }}</span>
                                                     </label>

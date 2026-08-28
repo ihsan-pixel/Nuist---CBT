@@ -460,7 +460,7 @@ window.examRoom = ({
     allQuestionsAnswered() {
         return this.questions.length > 0 && this.answeredCount() === this.questions.length;
     },
-    async saveCurrentAnswer(form) {
+    async saveCurrentAnswer(form, questionIndex = this.currentQuestionIndex) {
         const formData = new FormData(form);
 
         try {
@@ -484,8 +484,10 @@ window.examRoom = ({
             };
             this.markQuestionSaved(form);
 
-            if (this.currentQuestionIndex < this.questions.length - 1) {
-                this.nextQuestion();
+            const nextIndex = Math.min(questionIndex + 1, this.questions.length - 1);
+
+            if (nextIndex > questionIndex) {
+                this.setCurrentQuestion(nextIndex);
             }
         } catch (error) {
             console.warn(error);
