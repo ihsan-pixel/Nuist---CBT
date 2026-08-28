@@ -188,7 +188,6 @@ window.examLock = ({
     },
     async saveAnswer(form) {
         if (!this.answerUrl) {
-            form.submit();
             return;
         }
 
@@ -205,7 +204,6 @@ window.examLock = ({
             });
 
             if (!response.ok) {
-                form.submit();
                 return;
             }
 
@@ -215,7 +213,7 @@ window.examLock = ({
             this.statusText = 'Jawaban tersimpan';
             this.markQuestionSaved(form);
         } catch (error) {
-            form.submit();
+            console.warn('Failed to autosave answer', error);
         }
     },
     markQuestionSaved(form) {
