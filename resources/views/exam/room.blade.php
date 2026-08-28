@@ -218,6 +218,12 @@
                     const seconds = totalSeconds % 60;
                     this.timerLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 },
+                get answeredCount() {
+                    return this.questions.filter((question) => Boolean(this.answeredQuestions[String(question.id)])).length;
+                },
+                get unansweredCount() {
+                    return Math.max(0, this.questions.length - this.answeredCount);
+                },
             };
         };
     </script>
@@ -417,12 +423,6 @@
                         </div>
 
                         <aside class="w-full">
-                            @php
-                                $totalQuestions = $questions->count();
-                                $answeredCount = collect($savedAnswers)->filter(fn ($answer) => filled($answer))->count();
-                                $unansweredCount = max(0, $totalQuestions - $answeredCount);
-                            @endphp
-
                             <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                                 <div class="border-b border-slate-200 px-4 py-4 sm:px-5">
                                     <div class="flex items-start justify-between gap-4">
@@ -431,7 +431,7 @@
                                             {{-- <h3 class="mt-1 text-sm font-semibold text-slate-900">Ringkasan status pengerjaan</h3> --}}
                                         </div>
                                         <div class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                                            Total {{ $totalQuestions }} soal
+                                            Total {{ $questions->count() }} soal
                                         </div>
                                     </div>
                                 </div>
@@ -461,11 +461,11 @@
                                     <div class="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
                                         <div class="flex items-center gap-1.5">
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                                            <span>Sudah terjawab: {{ $answeredCount }}</span>
+                                            <span>Sudah terjawab: <span x-text="answeredCount"></span></span>
                                         </div>
                                         <div class="flex items-center gap-1.5">
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-slate-300"></span>
-                                            <span>Belum terjawab: {{ $unansweredCount }}</span>
+                                            <span>Belum terjawab: <span x-text="unansweredCount"></span></span>
                                         </div>
                                     </div>
                                 </div>
