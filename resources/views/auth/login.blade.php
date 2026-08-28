@@ -1,7 +1,7 @@
 <x-auth-login-layout>
-    <div class="min-h-screen overflow-x-hidden bg-[linear-gradient(180deg,#f4f8f6_0%,#eef4f1_100%)]">
+    <div class="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(0,134,106,0.10),_transparent_32%),linear-gradient(180deg,#f6faf8_0%,#edf4f0_100%)]">
         <div class="mx-auto grid min-h-screen w-full max-w-[1500px] lg:grid-cols-[1.08fr_0.92fr]">
-            <section class="relative hidden overflow-hidden bg-gradient-to-br from-[#00553F] via-[#006f55] to-[#00866A] px-12 py-10 text-white lg:flex lg:flex-col lg:justify-between">
+            <section class="relative hidden overflow-hidden bg-gradient-to-br from-[#004938] via-[#005f49] to-[#00866A] px-12 py-10 text-white lg:flex lg:flex-col lg:justify-between">
                 <div class="absolute inset-0">
                     <div class="absolute -left-20 top-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
                     <div class="absolute right-4 top-24 h-64 w-64 rounded-full bg-[#F5B700]/15 blur-3xl"></div>
@@ -21,7 +21,7 @@
                     </div>
 
                     <div class="mt-16 max-w-xl">
-                        <p class="text-lg font-medium tracking-[0.2em] text-white/80">NUIST CBT</p>
+                        <p class="text-sm font-semibold uppercase tracking-[0.32em] text-white/70">Sistem akses ujian</p>
                         <h1 class="mt-4 text-5xl font-semibold tracking-tight text-white">Sistem Computer Based Test</h1>
                         <p class="mt-5 max-w-lg text-base leading-7 text-white/82">
                             Platform pelaksanaan ujian berbasis komputer yang aman, praktis, dan terintegrasi.
@@ -43,8 +43,8 @@
             </section>
 
             <section class="flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
-                <div class="w-full max-w-lg">
-                    <div class="mb-5 flex items-center gap-3 rounded-2xl border border-[#dce7e2] bg-white px-4 py-3 shadow-sm lg:hidden">
+                <div class="w-full max-w-xl">
+                    <div class="mb-5 flex items-center gap-3 rounded-3xl border border-[#dce7e2] bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#00553F] to-[#00866A] p-2 shadow-md">
                             <x-application-logo class="h-8 w-8 fill-current text-white" />
                         </div>
@@ -54,20 +54,23 @@
                         </div>
                     </div>
 
-                    <div class="overflow-hidden rounded-[20px] border border-[#dfe7e3] bg-white shadow-[0_18px_40px_rgba(0,85,63,0.08)]">
-                        <div class="border-b border-slate-100 px-6 py-6 sm:px-8">
-                            <p class="text-2xl font-semibold tracking-tight text-slate-900">Selamat Datang</p>
-                            <p class="mt-2 text-sm leading-6 text-slate-600">Silakan masuk menggunakan akun yang telah diberikan.</p>
+                    <div class="overflow-hidden rounded-[24px] border border-[#dfe7e3] bg-white shadow-[0_18px_50px_rgba(0,85,63,0.10)]">
+                        <div class="border-b border-slate-100 bg-gradient-to-r from-[#f8fbfa] to-white px-6 py-7 sm:px-8">
+                            <div class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[#00553F]">
+                                Login
+                            </div>
+                            <p class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">Selamat Datang</p>
+                            <p class="mt-3 max-w-md text-sm leading-6 text-slate-600">Silakan masuk menggunakan akun yang telah diberikan untuk mengakses ruang ujian.</p>
                         </div>
 
-                        <div class="px-6 py-6 sm:px-8 sm:py-8" x-data="{ showPassword: false, submitting: false }">
-                            <x-auth-session-status class="mb-4 text-sm" :status="session('status')" />
+                        <div class="px-6 py-7 sm:px-8 sm:py-9" x-data="{ showPassword: false, submitting: false }">
+                            <x-auth-session-status class="mb-5 text-sm" :status="session('status')" />
 
                             <form method="POST" action="{{ route('login') }}" @submit="submitting = true">
                                 @csrf
 
-                                <div class="space-y-5">
-                                    <div class="space-y-2">
+                                <div class="space-y-6">
+                                    <div class="space-y-2.5">
                                         <x-input-label for="email" value="Email" />
                                         <div class="relative">
                                             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
@@ -76,21 +79,21 @@
                                                     <path d="m4.5 6.5 5.5 4 5.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>
                                             </span>
-                                            <x-text-input id="email" class="block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-4 text-sm shadow-sm focus:border-[#00866A] focus:ring-[#00866A]" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                                            <x-text-input id="email" class="block w-full rounded-2xl border-slate-300 bg-white py-3.5 pl-11 pr-4 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-[#00866A] focus:ring-[#00866A]" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
                                         </div>
                                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                                     </div>
 
-                                    <div class="space-y-2">
+                                    <div class="space-y-2.5">
                                         <x-input-label for="password" value="Kata Sandi" />
                                         <div class="relative">
                                             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                                     <path d="M6.5 9V6.75A3.5 3.5 0 0 1 10 3.25a3.5 3.5 0 0 1 3.5 3.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                                                     <rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
                                                 </svg>
                                             </span>
-                                            <x-text-input id="password" class="block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-12 text-sm shadow-sm focus:border-[#00866A] focus:ring-[#00866A]" x-bind:type="showPassword ? 'text' : 'password'" name="password" required autocomplete="current-password" />
+                                            <x-text-input id="password" class="block w-full rounded-2xl border-slate-300 bg-white py-3.5 pl-11 pr-12 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-[#00866A] focus:ring-[#00866A]" x-bind:type="showPassword ? 'text' : 'password'" name="password" required autocomplete="current-password" />
                                             <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 transition hover:text-[#00553F] focus:outline-none focus:text-[#00553F]" @click="showPassword = !showPassword" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
                                                 <svg x-show="!showPassword" class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                                     <path d="M2.5 10s2.75-5 7.5-5 7.5 5 7.5 5-2.75 5-7.5 5-7.5-5-7.5-5Z" stroke="currentColor" stroke-width="1.5"/>
@@ -120,7 +123,7 @@
                                     </div>
 
                                     <div class="pt-1">
-                                        <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00553F] to-[#00866A] px-4 py-3.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,85,63,0.18)] transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#00866A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80" :disabled="submitting">
+                                        <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#00553F] to-[#00866A] px-4 py-3.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,85,63,0.18)] transition hover:-translate-y-0.5 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#00866A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80" :disabled="submitting">
                                             <svg x-show="submitting" class="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" d="M4 12a8 8 0 0 1 8-8" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
@@ -131,7 +134,7 @@
                                 </div>
                             </form>
 
-                            <div class="mt-6 border-t border-slate-100 pt-5 text-center text-sm text-slate-500">
+                            <div class="mt-8 border-t border-slate-100 pt-5 text-center text-sm text-slate-500">
                                 <p>© 2026 NUIST — LP Ma’arif NU PWNU DIY</p>
                                 <p class="mt-2">Mengalami kendala masuk? Hubungi panitia.</p>
                             </div>
