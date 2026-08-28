@@ -34,13 +34,25 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         View::composer('*', function ($view): void {
-            $settings = Cache::remember('app-settings.current', now()->addMinutes(5), function (): AppSetting {
+            $settingsData = Cache::store('file')->remember('app-settings.current.v2', now()->addMinutes(5), function (): array {
                 if (! Schema::hasTable('app_settings')) {
-                    return new AppSetting;
+                    return [];
                 }
 
-                return AppSetting::query()->first() ?? new AppSetting;
+                return AppSetting::query()->first()?->toArray() ?? [];
             });
+
+            if ($settingsData instanceof AppSetting) {
+                $settingsData = $settingsData->toArray();
+            } elseif (is_object($settingsData)) {
+                $settingsData = [];
+            }
+
+            if (! is_array($settingsData)) {
+                $settingsData = [];
+            }
+
+            $settings = new AppSetting($settingsData);
 
             $view->with('appSettings', $settings);
         });
