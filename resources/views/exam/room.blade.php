@@ -284,8 +284,8 @@
                     @csrf
                 </form>
 
-                <div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:flex-row lg:items-start lg:px-8">
-                    <main class="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-none">
+                <div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:flex-row lg:flex-nowrap lg:items-start lg:px-8">
+                    <main class="flex min-w-0 flex-[1_1_auto] flex-col gap-6 lg:max-w-none">
                         <div class="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div class="min-w-0">
@@ -375,7 +375,7 @@
                         </div>
                     </main>
 
-                    <aside class="w-full lg:sticky lg:top-4 lg:w-[50px] lg:shrink-0">
+                    <aside class="w-full lg:sticky lg:top-4 lg:w-[240px] lg:shrink-0">
                         <div class="space-y-4">
                             <div class="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                                 <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Indikator Soal</p>
