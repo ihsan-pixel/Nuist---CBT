@@ -7,6 +7,7 @@ use App\Models\ExamSession;
 use App\Models\ExamViolation;
 use App\Models\SebAuditLog;
 use App\Support\SebConfig;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,7 @@ class ExamController extends Controller
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
         $hasSubmittedAnswers = $this->hasSubmittedSession($request, $exam);
+        $initialQuestionIndex = $this->initialQuestionIndex($session, $exam, $request->session()->get('exam.resume_question_id'));
 
         return view('exam.room', [
             'exam' => $exam,
@@ -53,6 +55,7 @@ class ExamController extends Controller
             'savedAnswers' => $session
                 ? $session->snapshots()->pluck('selected_answer', 'exam_question_id')->all()
                 : [],
+            'initialQuestionIndex' => $initialQuestionIndex,
             'isExpired' => (bool) ($endsAt && now()->greaterThanOrEqualTo($endsAt)),
             'sebDetected' => $sebDetected,
             'sebVerified' => (bool) $request->session()->get('seb.verified'),
@@ -82,6 +85,7 @@ class ExamController extends Controller
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
         $hasSubmittedAnswers = $this->hasSubmittedSession($request, $exam);
+        $initialQuestionIndex = $this->initialQuestionIndex($session, $exam, $request->session()->get('exam.resume_question_id'));
 
         return view('exam.room', [
             'exam' => $exam,
@@ -95,6 +99,7 @@ class ExamController extends Controller
             'savedAnswers' => $session
                 ? $session->snapshots()->pluck('selected_answer', 'exam_question_id')->all()
                 : [],
+            'initialQuestionIndex' => $initialQuestionIndex,
             'sebMode' => true,
             'sebDetected' => $sebDetected,
             'sebVerified' => (bool) $request->session()->get('seb.verified'),
@@ -251,7 +256,7 @@ class ExamController extends Controller
             ->with('status', 'Sesi ujian dimulai. Navigasi dibatasi sampai ujian selesai.');
     }
 
-    public function answer(Request $request): RedirectResponse
+    public function answer(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'question_id' => ['required', 'integer'],
@@ -265,6 +270,7 @@ class ExamController extends Controller
 
         $snapshot = $session->snapshots()->where('exam_question_id', $data['question_id'])->firstOrFail();
         $snapshot->forceFill(['selected_answer' => $data['answer']])->save();
+        $request->session()->put('exam.resume_question_id', $data['question_id']);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -421,6 +427,25 @@ class ExamController extends Controller
             ->whereNotNull('finished_at')
             ->whereHas('snapshots', fn ($query) => $query->whereNotNull('selected_answer'))
             ->exists();
+    }
+
+    private function initialQuestionIndex(?ExamSession $session, Exam $exam, mixed $resumeQuestionId): int
+    {
+        $questions = $exam->questions->sortBy('sort_order')->values();
+
+        if ($session && filled($resumeQuestionId)) {
+            $resumeIndex = $questions->search(fn ($question) => (string) $question->id === (string) $resumeQuestionId);
+
+            if ($resumeIndex !== false) {
+                return min($resumeIndex + 1, max(0, $questions->count() - 1));
+            }
+        }
+
+        $firstUnansweredIndex = $questions->search(function ($question) use ($session): bool {
+            return ! filled($session?->snapshots->firstWhere('exam_question_id', $question->id)?->selected_answer);
+        });
+
+        return $firstUnansweredIndex !== false ? $firstUnansweredIndex : 0;
     }
 
     private function sebStatusSummary(Request $request, ?Exam $exam = null): array

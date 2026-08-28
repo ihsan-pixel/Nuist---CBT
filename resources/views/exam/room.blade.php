@@ -30,8 +30,9 @@
                         });
                     }
 
-                    const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
-                    this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
+                    this.currentQuestionIndex = Number.isInteger(config.initialQuestionIndex)
+                        ? config.initialQuestionIndex
+                        : 0;
                     this.updateTimerLabel();
                 },
                 async verifySeb() {
@@ -229,6 +230,7 @@
             hasSubmittedAnswers: @js((bool) ($hasSubmittedAnswers ?? false)),
             handshakeMessage: '',
             answeredQuestions: @js(collect($savedAnswers)->map(fn ($answer) => filled($answer))->all()),
+            initialQuestionIndex: @js($initialQuestionIndex ?? 0),
             questions: @js($questions->map(fn ($question) => [
                 'id' => $question->id,
                 'sort_order' => $question->sort_order,
