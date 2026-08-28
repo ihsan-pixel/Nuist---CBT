@@ -284,7 +284,7 @@
                     @csrf
                 </form>
 
-                <div class="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+                <div class="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_240px] lg:px-8">
                     <main class="flex min-w-0 flex-col gap-6">
                         <div class="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -377,9 +377,9 @@
 
                     <aside class="lg:sticky lg:top-4">
                         <div class="space-y-4">
-                            <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                            <div class="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                                 <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Indikator Soal</p>
-                                <div class="mt-4 grid grid-cols-5 gap-2">
+                                <div class="mt-4 grid grid-cols-10 gap-1.5">
                                     @foreach ($questions as $question)
                                         <button
                                             type="button"
@@ -387,7 +387,7 @@
                                             data-question-indicator
                                             data-index="{{ $loop->index }}"
                                             x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
-                                            class="flex h-11 items-center justify-center rounded-2xl border text-sm font-semibold transition"
+                                            class="flex h-8 w-8 items-center justify-center rounded-lg border text-[11px] font-semibold transition"
                                             x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-400/20 text-sky-100' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-400/15 text-emerald-100' : 'border-white/10 bg-black/20 text-slate-300 hover:border-sky-300/40 hover:bg-white/10')"
                                         >
                                             {{ $loop->iteration }}
