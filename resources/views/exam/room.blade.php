@@ -140,17 +140,20 @@
 
                 this.currentQuestionIndex = index;
                 this.scrollToCurrentQuestion();
+                this.updateIndicatorState();
             },
             nextQuestion() {
                 if (this.currentQuestionIndex < this.questions.length - 1) {
                     this.currentQuestionIndex += 1;
                     this.scrollToCurrentQuestion();
+                    this.updateIndicatorState();
                 }
             },
             previousQuestion() {
                 if (this.currentQuestionIndex > 0) {
                     this.currentQuestionIndex -= 1;
                     this.scrollToCurrentQuestion();
+                    this.updateIndicatorState();
                 }
             },
             scrollToCurrentQuestion() {
@@ -158,6 +161,13 @@
                     const currentCard = this.$root.querySelector(`[data-question-card="${this.questions[this.currentQuestionIndex]?.id}"]`);
 
                     currentCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            },
+            updateIndicatorState() {
+                this.$nextTick(() => {
+                    this.$root.querySelectorAll('[data-question-indicator]').forEach((button) => {
+                        button.dataset.active = button.dataset.index === String(this.currentQuestionIndex);
+                    });
                 });
             },
             markAnswered(questionId, answer) {
@@ -187,7 +197,7 @@
                         type="button"
                         @click="beginExam()"
                         class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-60"
-                        :disabled="submitting || (sebRequired && !sebDetected && !sebVerified)"
+                        x-bind:disabled="submitting || (sebRequired && !sebDetected && !sebVerified)"
                     >
                         <span x-show="!submitting" x-cloak>Mulai Ujian</span>
                         <span x-show="submitting" x-cloak>Memulai...</span>
@@ -335,6 +345,9 @@
                                         <button
                                             type="button"
                                             @click="setCurrentQuestion({{ $loop->index }})"
+                                            data-question-indicator
+                                            data-index="{{ $loop->index }}"
+                                            x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
                                             class="flex h-11 items-center justify-center rounded-2xl border text-sm font-semibold transition"
                                             x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-400/20 text-sky-100' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-400/15 text-emerald-100' : 'border-white/10 bg-black/20 text-slate-300 hover:border-sky-300/40 hover:bg-white/10')"
                                         >
