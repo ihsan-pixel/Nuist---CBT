@@ -105,17 +105,14 @@ class ExamController extends Controller
         $exam = Exam::query()->where('is_active', true)->orderBy('id')->firstOrFail();
         $settings = SebConfig::settings($request, $exam);
         $plist = SebConfig::plistXml($settings);
-
-        $sebBinary = gzencode('plnd'.$plist, 9);
+        $sebBinary = SebConfig::sebBinary($plist);
         $filename = Str::slug($exam->title ?: 'nuist-cbt').'.seb';
 
         return response($sebBinary, 200, [
-            'Content-Type' => 'application/octet-stream',
+            'Content-Type' => 'application/seb',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-            'Content-Length' => strlen($sebBinary),
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-            'Pragma' => 'no-cache',
-            'Expires' => '0',
+            'Content-Length' => (string) strlen($sebBinary),
+            'Cache-Control' => 'private, no-store, no-cache, must-revalidate',
         ]);
     }
 
