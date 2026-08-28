@@ -42,9 +42,9 @@
                 </div>
             </section>
 
-            <section class="flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
-                <div class="w-full max-w-xl">
-                    <div class="mb-5 flex items-center gap-3 rounded-3xl border border-[#dce7e2] bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
+            <section class="flex items-center justify-center px-4 py-10 sm:px-6 lg:px-10">
+                <div class="w-full max-w-[760px]">
+                    <div class="mb-5 flex items-center gap-3 rounded-3xl border border-[#dce7e2] bg-white/95 px-5 py-4 shadow-sm backdrop-blur lg:hidden">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#00553F] to-[#00866A] p-2 shadow-md">
                             <x-application-logo class="h-8 w-8 fill-current text-white" />
                         </div>
@@ -54,16 +54,16 @@
                         </div>
                     </div>
 
-                    <div class="overflow-hidden rounded-[24px] border border-[#dfe7e3] bg-white shadow-[0_18px_50px_rgba(0,85,63,0.10)]">
-                        <div class="border-b border-slate-100 bg-gradient-to-r from-[#f8fbfa] to-white px-6 py-7 sm:px-8">
+                    <div class="overflow-hidden rounded-[28px] border border-[#dfe7e3] bg-white shadow-[0_24px_70px_rgba(0,85,63,0.12)]">
+                        <div class="border-b border-slate-100 bg-[linear-gradient(135deg,#f8fbfa_0%,#ffffff_55%,#f3faf6_100%)] px-6 py-8 sm:px-9">
                             <div class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[#00553F]">
                                 Login
                             </div>
                             <p class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">Selamat Datang</p>
-                            <p class="mt-3 max-w-md text-sm leading-6 text-slate-600">Silakan masuk menggunakan akun yang telah diberikan untuk mengakses ruang ujian.</p>
+                            <p class="mt-3 max-w-lg text-sm leading-6 text-slate-600">Silakan masuk menggunakan akun yang telah diberikan untuk mengakses ruang ujian.</p>
                         </div>
 
-                        <div class="px-6 py-7 sm:px-8 sm:py-9" x-data="{ showPassword: false, submitting: false }">
+                        <div class="px-6 py-8 sm:px-9 sm:py-10" x-data="{ showPassword: false, submitting: false }">
                             <x-auth-session-status class="mb-5 text-sm" :status="session('status')" />
 
                             <form method="POST" action="{{ route('login') }}" @submit="submitting = true">
@@ -79,7 +79,7 @@
                                                     <path d="m4.5 6.5 5.5 4 5.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>
                                             </span>
-                                            <x-text-input id="email" class="block w-full rounded-2xl border-slate-300 bg-white py-3.5 pl-11 pr-4 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-[#00866A] focus:ring-[#00866A]" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                                            <x-text-input id="email" class="pl-11 pr-4" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
                                         </div>
                                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                                     </div>
@@ -93,7 +93,7 @@
                                                     <rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
                                                 </svg>
                                             </span>
-                                            <x-text-input id="password" class="block w-full rounded-2xl border-slate-300 bg-white py-3.5 pl-11 pr-12 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-[#00866A] focus:ring-[#00866A]" x-bind:type="showPassword ? 'text' : 'password'" name="password" required autocomplete="current-password" />
+                                            <x-text-input id="password" class="pl-11 pr-12" x-bind:type="showPassword ? 'text' : 'password'" name="password" required autocomplete="current-password" />
                                             <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 transition hover:text-[#00553F] focus:outline-none focus:text-[#00553F]" @click="showPassword = !showPassword" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
                                                 <svg x-show="!showPassword" class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                                     <path d="M2.5 10s2.75-5 7.5-5 7.5 5 7.5 5-2.75 5-7.5 5-7.5-5-7.5-5Z" stroke="currentColor" stroke-width="1.5"/>
