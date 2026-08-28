@@ -46,6 +46,7 @@ Route::middleware(['auth', 'exam.lock', 'exam.headers'])->group(function () {
     Route::post('/exam/start', [ExamController::class, 'start'])->name('exam.start');
     Route::post('/exam/answer', [ExamController::class, 'answer'])->name('exam.answer');
     Route::post('/exam/finish', [ExamController::class, 'finish'])->name('exam.finish');
+    Route::get('/exam/completed', [ExamController::class, 'completed'])->name('exam.completed');
     Route::post('/exam/heartbeat', [ExamController::class, 'heartbeat'])->name('exam.heartbeat');
     Route::post('/exam/refresh-session', [ExamController::class, 'refreshSession'])->name('exam.refresh-session');
     Route::post('/exam/violation', [ExamController::class, 'violation'])->name('exam.violation');

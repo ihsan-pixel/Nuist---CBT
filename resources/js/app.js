@@ -506,7 +506,7 @@ window.examRoom = ({
                 throw new Error('Failed to finish exam');
             }
 
-            window.location.href = '/dashboard';
+            window.location.href = '/exam/completed';
         } catch (error) {
             console.warn(error);
         }

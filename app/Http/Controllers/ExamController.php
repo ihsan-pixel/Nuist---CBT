@@ -267,8 +267,17 @@ class ExamController extends Controller
         $request->session()->forget('exam.active');
 
         return redirect()
-            ->route('dashboard')
+            ->route('exam.completed')
             ->with('status', 'Sesi ujian selesai dan penguncian dibuka.');
+    }
+
+    public function completed(Request $request): View
+    {
+        abort_unless($request->user(), 403);
+
+        return view('exam.completed', [
+            'user' => $request->user(),
+        ]);
     }
 
     private function forceFinish(Request $request, ExamSession $session, string $reason): RedirectResponse

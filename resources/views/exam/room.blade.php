@@ -194,7 +194,7 @@
                             throw new Error('Failed to finish exam');
                         }
 
-                        window.location.href = @js(route('dashboard'));
+                        window.location.href = @js(route('exam.completed'));
                     } catch (error) {
                         console.warn(error);
                     }
