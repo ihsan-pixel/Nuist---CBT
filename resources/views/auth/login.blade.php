@@ -1,4 +1,9 @@
 <x-guest-layout>
+    <div class="mb-4 text-center">
+        <h1 class="text-2xl font-semibold text-gray-900">Selamat Datang</h1>
+        <p class="mt-2 text-sm text-gray-600">Silakan masuk menggunakan akun yang telah diberikan.</p>
+    </div>
+
     <form method="POST" action="{{ route('login') }}" x-data="{ showPassword: false, submitting: false }" @submit="submitting = true">
         @csrf
 
@@ -12,10 +17,10 @@
             <x-input-label for="password" :value="__('Password')" />
 
             <div class="relative mt-1">
-                <x-text-input
+                <input
                     id="password"
                     class="block w-full pr-12"
-                    :type="showPassword ? 'text' : 'password'"
+                    x-bind:type="showPassword ? 'text' : 'password'"
                     name="password"
                     required
                     autocomplete="current-password"
@@ -56,9 +61,13 @@
         </div>
 
         <div class="mt-4 flex items-center justify-end">
-            <x-primary-button class="ms-4" :disabled="submitting">
+            <button
+                type="submit"
+                class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900 disabled:opacity-25"
+                x-bind:disabled="submitting"
+            >
                 <span x-text="submitting ? 'Memproses...' : 'Masuk'">Masuk</span>
-            </x-primary-button>
+            </button>
         </div>
     </form>
 </x-guest-layout>
