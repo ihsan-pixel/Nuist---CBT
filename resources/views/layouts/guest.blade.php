@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>NUIST CBT LPMNU PWNU DIY</title>
         <link rel="icon" type="image/png" href="{{ asset('favicon.ico') }}">
 
         <!-- Fonts -->
@@ -24,6 +24,12 @@
             </div>
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+                <div class="mb-6 text-center">
+                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-700">NUIST CBT</p>
+                    <h1 class="mt-3 text-2xl font-bold text-slate-900">LPMNU PWNU DIY</h1>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">Sistem Computer Based Test resmi untuk pelaksanaan ujian.</p>
+                </div>
+
                 {{ $slot }}
             </div>
         </div>
