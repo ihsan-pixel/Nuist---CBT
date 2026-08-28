@@ -149,19 +149,6 @@
                 getFirstUnansweredQuestionIndex() {
                     return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
                 },
-                answeredCount() {
-                    return this.questions.filter((question) => Boolean(this.answeredQuestions[String(question.id)])).length;
-                },
-                unansweredCount() {
-                    return Math.max(0, this.questions.length - this.answeredCount());
-                },
-                progressPercentage() {
-                    if (!this.questions.length) {
-                        return 0;
-                    }
-
-                    return Math.round((this.answeredCount() / this.questions.length) * 100);
-                },
                 async saveCurrentAnswer(form) {
                     const formData = new FormData(form);
 
@@ -180,10 +167,7 @@
                         }
 
                         const payload = await response.json();
-                        this.answeredQuestions = {
-                            ...this.answeredQuestions,
-                            [String(payload.question_id)]: Boolean(payload.answer),
-                        };
+                        this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
                         this.markQuestionSaved(form);
                     } catch (error) {
                         console.warn(error);
@@ -430,48 +414,28 @@
                             </div>
                         </div>
 
-                        <aside class="w-full lg:sticky lg:top-4 lg:self-start">
-                            <div class="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm shadow-emerald-950/5">
-                                <div class="border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white px-4 py-4 sm:px-5">
+                        <aside class="w-full">
+                            @php
+                                $totalQuestions = $questions->count();
+                                $answeredCount = collect($savedAnswers)->filter(fn ($answer) => filled($answer))->count();
+                                $unansweredCount = max(0, $totalQuestions - $answeredCount);
+                            @endphp
+
+                            <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                                <div class="border-b border-slate-200 px-4 py-4 sm:px-5">
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
-                                            <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#00553F]">Indikator Soal</p>
-                                            <h3 class="mt-1 text-sm font-semibold text-slate-900">Navigasi cepat per nomor</h3>
+                                            <p class="text-[10px] uppercase tracking-[0.28em] text-slate-500">Indikator Soal</p>
+                                            {{-- <h3 class="mt-1 text-sm font-semibold text-slate-900">Ringkasan status pengerjaan</h3> --}}
                                         </div>
-                                        <div class="rounded-full border border-emerald-100 bg-white px-3 py-1 text-[11px] font-medium text-[#00553F]">
-                                            <span x-text="answeredCount()"></span>/<span x-text="questions.length"></span> terjawab
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4 grid gap-3 sm:grid-cols-3">
-                                        <div class="rounded-2xl border border-emerald-100 bg-white px-3 py-2">
-                                            <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500">Total</div>
-                                            <div class="mt-1 text-lg font-semibold text-slate-900" x-text="questions.length"></div>
-                                        </div>
-                                        <div class="rounded-2xl border border-emerald-100 bg-white px-3 py-2">
-                                            <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500">Terjawab</div>
-                                            <div class="mt-1 text-lg font-semibold text-[#00866A]" x-text="answeredCount()"></div>
-                                        </div>
-                                        <div class="rounded-2xl border border-emerald-100 bg-white px-3 py-2">
-                                            <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500">Belum</div>
-                                            <div class="mt-1 text-lg font-semibold text-amber-600" x-text="unansweredCount()"></div>
+                                        <div class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                                            Total {{ $totalQuestions }} soal
                                         </div>
                                     </div>
-
-                                    <div class="mt-4 h-2 overflow-hidden rounded-full bg-emerald-50">
-                                        <div
-                                            class="h-full rounded-full bg-gradient-to-r from-[#00553F] to-[#00866A] transition-all duration-300"
-                                            x-bind:style="`width: ${progressPercentage()}%`"
-                                        ></div>
-                                    </div>
-                                    <p class="mt-2 text-[11px] text-slate-500">
-                                        Progress pengerjaan
-                                        <span class="font-semibold text-slate-700" x-text="`${progressPercentage()}%`"></span>
-                                    </p>
                                 </div>
 
                                 <div class="px-4 py-4 sm:px-5">
-                                    <div class="grid grid-cols-6 justify-items-center gap-2 sm:grid-cols-10 lg:grid-cols-6">
+                                    <div class="grid grid-cols-10 gap-2">
                                         @foreach ($questions as $question)
                                             <button
                                                 type="button"
@@ -479,36 +443,22 @@
                                                 data-question-indicator
                                                 data-index="{{ $loop->index }}"
                                                 x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
-                                                x-bind:aria-current="currentQuestionIndex === {{ $loop->index }} ? 'step' : null"
-                                                aria-label="Buka soal nomor {{ $loop->iteration }}"
-                                                class="relative flex h-10 w-10 items-center justify-center rounded-xl border text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#00866A]/30 focus:ring-offset-2 focus:ring-offset-white sm:h-11 sm:w-11"
-                                                x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-[#00553F] bg-[#00553F] text-white shadow-sm shadow-[#00553F]/20 ring-2 ring-[#00866A]/20' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-200 bg-emerald-50 text-[#00553F] hover:border-[#00866A] hover:bg-emerald-100' : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50 hover:text-[#00553F]')"
+                                                class="flex h-8 w-8 items-center justify-center rounded-lg border text-[10px] font-semibold transition sm:h-9 sm:w-9"
+                                                x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-100 text-sky-800 shadow-sm' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-sky-300 hover:bg-sky-50')"
                                             >
-                                                <span>{{ $loop->iteration }}</span>
-                                                <span
-                                                    x-cloak
-                                                    x-show="answeredQuestions['{{ $question->id }}'] && currentQuestionIndex !== {{ $loop->index }}"
-                                                    class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-[#00866A] text-[9px] font-bold text-white shadow-sm"
-                                                    aria-hidden="true"
-                                                >
-                                                    ✓
-                                                </span>
+                                                {{ $loop->iteration }}
                                             </button>
                                         @endforeach
                                     </div>
 
-                                    <div class="mt-5 grid gap-2 text-[11px] text-slate-600 sm:grid-cols-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-block h-2.5 w-2.5 rounded-full bg-[#00553F]"></span>
-                                            <span>Soal aktif</span>
+                                    <div class="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                                            <span>Sudah terjawab: {{ $answeredCount }}</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-block h-2.5 w-2.5 rounded-full bg-[#00866A]"></span>
-                                            <span>Sudah terjawab</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-1.5">
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-slate-300"></span>
-                                            <span>Belum terjawab</span>
+                                            <span>Belum terjawab: {{ $unansweredCount }}</span>
                                         </div>
                                     </div>
                                 </div>

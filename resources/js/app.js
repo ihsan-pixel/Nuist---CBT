@@ -211,10 +211,7 @@ window.examLock = ({
 
             const payload = await response.json();
             this.savedAnswers[String(payload.question_id)] = payload.answer;
-            this.answeredQuestions = {
-                ...this.answeredQuestions,
-                [String(payload.question_id)]: Boolean(payload.answer),
-            };
+            this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
             this.statusText = 'Jawaban tersimpan';
             this.markQuestionSaved(form);
         } catch (error) {
@@ -464,19 +461,6 @@ window.examRoom = ({
     getFirstUnansweredQuestionIndex() {
         return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
     },
-    answeredCount() {
-        return this.questions.filter((question) => Boolean(this.answeredQuestions[String(question.id)])).length;
-    },
-    unansweredCount() {
-        return Math.max(0, this.questions.length - this.answeredCount());
-    },
-    progressPercentage() {
-        if (!this.questions.length) {
-            return 0;
-        }
-
-        return Math.round((this.answeredCount() / this.questions.length) * 100);
-    },
     async saveCurrentAnswer(form) {
         const formData = new FormData(form);
 
@@ -495,10 +479,7 @@ window.examRoom = ({
             }
 
             const payload = await response.json();
-            this.answeredQuestions = {
-                ...this.answeredQuestions,
-                [String(payload.question_id)]: Boolean(payload.answer),
-            };
+            this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
             this.markQuestionSaved(form);
         } catch (error) {
             console.warn(error);
