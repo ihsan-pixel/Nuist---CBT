@@ -37,7 +37,7 @@
                     this.syncTimerFromEndsAt();
                     this.updateTimerLabel();
 
-                    if (this.started && this.endsAt) {
+                    if (this.active && this.endsAt && this.remainingSeconds > 0) {
                         this.timerHandle = window.setInterval(() => {
                             this.syncTimerFromEndsAt();
                             if (this.remainingSeconds === 0) {
@@ -130,7 +130,7 @@
                             throw new Error('Failed to start exam');
                         }
 
-                        this.active = true;
+                        window.location.href = response.url || @js(route('exam.room'));
                     } catch (error) {
                         console.warn(error);
                         this.submitting = false;

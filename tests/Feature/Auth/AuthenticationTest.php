@@ -141,4 +141,26 @@ class AuthenticationTest extends TestCase
             'selected_answer' => 'B',
         ]);
     }
+
+    public function test_exam_room_receives_active_session_data_after_starting_exam(): void
+    {
+        $user = User::factory()->create([
+            'role' => UserRole::Peserta,
+        ]);
+
+        $exam = Exam::query()->create([
+            'title' => 'Ujian Percobaan',
+            'description' => 'Deskripsi',
+            'duration_minutes' => 30,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)->post(route('exam.start'));
+
+        $response = $this->actingAs($user)->get(route('exam.room'));
+
+        $response->assertOk();
+        $response->assertSee('active: true', false);
+        $response->assertSee('endsAt:', false);
+    }
 }
