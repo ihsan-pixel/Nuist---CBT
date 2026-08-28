@@ -31,7 +31,7 @@ class ExamRoomSebButtonTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('sebVerified: true', false);
-        $response->assertSee(':disabled="submitting || (sebRequired && !sebDetected && !sebVerified)"', false);
+        $response->assertSee('sebDetected: true', false);
         $response->assertSee('Mulai Ujian', false);
     }
 }
