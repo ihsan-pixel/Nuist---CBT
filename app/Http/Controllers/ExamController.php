@@ -122,6 +122,7 @@ class ExamController extends Controller
             'sebDetected' => (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified')),
             'configDownloadUrl' => route('exam.seb-config'),
             'sebEntryUrl' => route('exam.seb'),
+            'roomUrl' => route('exam.room'),
         ]);
     }
 

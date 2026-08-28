@@ -416,7 +416,7 @@ window.examRoom = ({
                 throw new Error('Failed to start exam');
             }
 
-            this.active = true;
+            window.location.href = '/exam';
         } catch (error) {
             console.warn(error);
             this.submitting = false;
