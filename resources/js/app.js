@@ -461,6 +461,9 @@ window.examRoom = ({
     getFirstUnansweredQuestionIndex() {
         return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
     },
+    allQuestionsAnswered() {
+        return this.questions.length > 0 && this.answeredCount() === this.questions.length;
+    },
     async saveCurrentAnswer(form) {
         const formData = new FormData(form);
 

@@ -149,6 +149,9 @@
                 getFirstUnansweredQuestionIndex() {
                     return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
                 },
+                allQuestionsAnswered() {
+                    return this.questions.length > 0 && this.answeredCount() === this.questions.length;
+                },
                 async saveCurrentAnswer(form) {
                     const formData = new FormData(form);
 
@@ -395,14 +398,17 @@
                                                     </label>
                                                 @endforeach
                                             </div>
-                                            <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                                                <p class="text-xs text-slate-500">Jawaban disimpan ke sesi ujian pengguna.</p>
-                                                @if ($loop->last)
-                                                    <x-primary-button type="button" @click="submitExam()">
-                                                        {{ __('Kirim Jawaban') }}
-                                                    </x-primary-button>
-                                                @endif
-                                            </div>
+                    <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs text-slate-500">Jawaban disimpan ke sesi ujian pengguna.</p>
+                        <x-primary-button
+                            type="button"
+                            @click="submitExam()"
+                            x-show="allQuestionsAnswered()"
+                            x-cloak
+                        >
+                            {{ __('Kirim Jawaban') }}
+                        </x-primary-button>
+                    </div>
                                         </form>
                                     </article>
                                 @endforeach
