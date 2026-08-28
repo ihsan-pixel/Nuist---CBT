@@ -69,7 +69,7 @@
                     alert('Mode Safe Exam Browser wajib dibuka lewat aplikasi SEB, bukan browser biasa.');
                     return;
                 }
-                if (this.sebRequired && !this.sebVerified) {
+                if (this.sebRequired && !this.sebDetected && !this.sebVerified) {
                     alert('Verifikasi SEB belum selesai.');
                     return;
                 }
