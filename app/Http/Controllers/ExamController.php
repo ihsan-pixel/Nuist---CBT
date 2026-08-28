@@ -30,6 +30,7 @@ class ExamController extends Controller
         $session = $this->currentSession($request, $exam);
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
+        $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
 
         return view('exam.room', [
             'exam' => $exam,
@@ -45,6 +46,8 @@ class ExamController extends Controller
                 ? $session->snapshots()->pluck('selected_answer', 'exam_question_id')->all()
                 : [],
             'isExpired' => (bool) ($endsAt && now()->greaterThanOrEqualTo($endsAt)),
+            'sebDetected' => $sebDetected,
+            'sebVerified' => (bool) $request->session()->get('seb.verified'),
         ]);
     }
 
@@ -61,6 +64,7 @@ class ExamController extends Controller
         $session = $this->currentSession($request, $exam);
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
+        $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
 
         return view('exam.room', [
             'exam' => $exam,
@@ -75,6 +79,8 @@ class ExamController extends Controller
                 ? $session->snapshots()->pluck('selected_answer', 'exam_question_id')->all()
                 : [],
             'sebMode' => true,
+            'sebDetected' => $sebDetected,
+            'sebVerified' => (bool) $request->session()->get('seb.verified'),
         ]);
     }
 
