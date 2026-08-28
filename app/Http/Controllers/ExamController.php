@@ -35,6 +35,11 @@ class ExamController extends Controller
         }
 
         $session = $this->currentSession($request, $exam);
+
+        if ($session && ! $session->started_at && ! $session->finished_at) {
+            $session = $this->startPendingSession($session, $exam);
+        }
+
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
@@ -80,6 +85,11 @@ class ExamController extends Controller
         }
 
         $session = $this->currentSession($request, $exam);
+
+        if ($session && ! $session->started_at && ! $session->finished_at) {
+            $session = $this->startPendingSession($session, $exam);
+        }
+
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
@@ -221,8 +231,8 @@ class ExamController extends Controller
                     'exam_id' => $exam->id,
                 ],
                 [
-                    'started_at' => now(),
-                    'expires_at' => now()->addMinutes($exam->duration_minutes),
+                    'started_at' => null,
+                    'expires_at' => null,
                     'finished_at' => null,
                     'warning_count' => 0,
                     'is_locked' => true,
@@ -417,6 +427,43 @@ class ExamController extends Controller
             ->where('exam_id', $exam->id)
             ->latest('id')
             ->first();
+    }
+
+    private function startPendingSession(ExamSession $session, Exam $exam): ExamSession
+    {
+        DB::transaction(function () use ($session, $exam) {
+            $now = now();
+
+            $session->forceFill([
+                'started_at' => $now,
+                'expires_at' => $now->copy()->addMinutes($exam->duration_minutes),
+            ])->save();
+
+            if ($session->snapshots()->exists()) {
+                return;
+            }
+
+            $exam->loadMissing('questions.options');
+
+            foreach ($exam->questions->sortBy('sort_order') as $question) {
+                $session->snapshots()->create([
+                    'exam_question_id' => $question->id,
+                    'sort_order' => $question->sort_order,
+                    'question_text' => $question->question_text,
+                    'option_snapshot' => $question->options
+                        ->sortBy('option_label')
+                        ->values()
+                        ->map(fn ($option) => [
+                            'option_label' => $option->option_label,
+                            'option_text' => $option->option_text,
+                        ])
+                        ->all(),
+                    'selected_answer' => null,
+                ]);
+            }
+        });
+
+        return $session->refresh();
     }
 
     private function hasSubmittedSession(Request $request, Exam $exam): bool

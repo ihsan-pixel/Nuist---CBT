@@ -306,6 +306,7 @@ window.examRoom = ({
     answerUrl = null,
     refreshUrl = null,
     finishUrl = null,
+    roomUrl = null,
 } = {}) => ({
     active,
     submitting,
@@ -321,6 +322,7 @@ window.examRoom = ({
     answerUrl,
     refreshUrl,
     finishUrl,
+    roomUrl,
     timerLabel: '--:--',
     timerHandle: null,
     init() {
@@ -416,7 +418,7 @@ window.examRoom = ({
                 throw new Error('Failed to start exam');
             }
 
-            this.active = true;
+            window.location.href = this.roomUrl || '/exam';
         } catch (error) {
             console.warn(error);
             this.submitting = false;

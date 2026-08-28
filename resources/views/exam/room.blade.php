@@ -16,6 +16,7 @@
                 answerUrl: config.answerUrl || null,
                 refreshUrl: config.refreshUrl || null,
                 finishUrl: config.finishUrl || null,
+                roomUrl: config.roomUrl || null,
                 timerLabel: '--:--',
                 timerHandle: null,
                 init() {
@@ -105,7 +106,7 @@
                             throw new Error('Failed to start exam');
                         }
 
-                        this.active = true;
+                        window.location.href = this.roomUrl || @js(route('exam.room'));
                     } catch (error) {
                         console.warn(error);
                         this.submitting = false;
@@ -250,6 +251,7 @@
             violationUrl: @js(route('exam.violation')),
             answerUrl: @js(route('exam.answer')),
             finishUrl: @js(route('exam.finish')),
+            roomUrl: @js(route('exam.room')),
             refreshUrl: @js(route('exam.refresh-session')),
         })"
         x-init="init()"
