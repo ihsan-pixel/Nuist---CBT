@@ -288,8 +288,19 @@ class ExamController extends Controller
     {
         abort_unless($request->user(), 403);
 
+        $exam = $this->activeExam();
+        $session = $exam
+            ? $this->currentSession($request, $exam)
+            : null;
+        $totalQuestions = (int) $session?->snapshots()->count();
+        $answeredQuestions = (int) $session?->snapshots()->whereNotNull('selected_answer')->count();
+        $unansweredQuestions = max(0, $totalQuestions - $answeredQuestions);
+
         return view('exam.completed', [
             'user' => $request->user(),
+            'totalQuestions' => $totalQuestions,
+            'answeredQuestions' => $answeredQuestions,
+            'unansweredQuestions' => $unansweredQuestions,
         ]);
     }
 

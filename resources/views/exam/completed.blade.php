@@ -16,6 +16,22 @@
             <p class="mt-4 text-base leading-7 text-slate-600">
                 Jawaban Anda sudah terkirim dan sesi ujian telah ditutup dengan aman.
             </p>
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-3">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="text-xs uppercase tracking-[0.25em] text-slate-500">Total Soal</div>
+                    <div class="mt-2 text-2xl font-bold text-slate-900">{{ $totalQuestions ?? 0 }}</div>
+                </div>
+                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                    <div class="text-xs uppercase tracking-[0.25em] text-emerald-700">Terjawab</div>
+                    <div class="mt-2 text-2xl font-bold text-emerald-700">{{ $answeredQuestions ?? 0 }}</div>
+                </div>
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <div class="text-xs uppercase tracking-[0.25em] text-amber-700">Tidak Terjawab</div>
+                    <div class="mt-2 text-2xl font-bold text-amber-700">{{ $unansweredQuestions ?? 0 }}</div>
+                </div>
+            </div>
+
             <p class="mt-2 text-sm leading-6 text-slate-500">
                 Silakan logout untuk mengakhiri sesi Safe Exam Browser dan kembali ke halaman login.
             </p>
