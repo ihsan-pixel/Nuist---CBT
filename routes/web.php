@@ -64,6 +64,8 @@ Route::middleware(['auth', 'can:access-exam-panel', 'exam.lock', 'exam.headers']
     Route::put('/exams/{exam}', [ExamAdminController::class, 'update'])->name('exams.update');
     Route::delete('/exams/{exam}', [ExamAdminController::class, 'destroy'])->name('exams.destroy');
     Route::post('/exams/{exam}/questions', [ExamAdminController::class, 'storeQuestion'])->name('exams.questions.store');
+    Route::post('/exams/{exam}/questions/import', [ExamAdminController::class, 'importQuestions'])->name('exams.questions.import');
+    Route::get('/exams/{exam}/questions/template', [ExamAdminController::class, 'downloadQuestionsTemplate'])->name('exams.questions.template');
     Route::delete('/questions/{question}', [ExamAdminController::class, 'destroyQuestion'])->name('questions.destroy');
     Route::post('/questions/{question}/options', [ExamAdminController::class, 'storeOption'])->name('questions.options.store');
     Route::delete('/options/{option}', [ExamAdminController::class, 'destroyOption'])->name('options.destroy');

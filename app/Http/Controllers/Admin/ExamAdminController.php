@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\ExamQuestionsTemplateExport;
 use App\Http\Controllers\Controller;
+use App\Imports\ExamQuestionsImport;
 use App\Models\Exam;
 use App\Models\ExamOption;
 use App\Models\ExamQuestion;
@@ -11,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExamAdminController extends Controller
@@ -142,6 +145,26 @@ class ExamAdminController extends Controller
         $exam->questions()->create($data);
 
         return back()->with('status', 'Soal berhasil ditambahkan.');
+    }
+
+    public function importQuestions(Request $request, Exam $exam): RedirectResponse
+    {
+        $data = $request->validate([
+            'questions_file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        Excel::import(new ExamQuestionsImport($exam), $data['questions_file']);
+
+        return redirect()
+            ->route('admin.exams.edit', $exam)
+            ->with('status', 'Soal berhasil diimpor dari file Excel.');
+    }
+
+    public function downloadQuestionsTemplate(Exam $exam)
+    {
+        $filename = 'template-soal-'.str($exam->title)->slug('-').'.xlsx';
+
+        return Excel::download(new ExamQuestionsTemplateExport, $filename);
     }
 
     public function storeOption(Request $request, ExamQuestion $question): RedirectResponse

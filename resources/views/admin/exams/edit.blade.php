@@ -84,10 +84,37 @@
                         <h3 class="text-lg font-semibold text-gray-900">Bank Soal</h3>
                         <p class="text-sm text-gray-500">Tambah atau hapus soal dan opsi tanpa meninggalkan halaman.</p>
                     </div>
-                    <button type="button" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white" @click="addQuestion()">
-                        Tambah Soal
-                    </button>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a
+                            href="{{ route('admin.exams.questions.template', $exam) }}"
+                            class="rounded-md border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-700 transition hover:bg-slate-50"
+                        >
+                            Unduh Template Excel
+                        </a>
+                        <button type="button" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white" @click="addQuestion()">
+                            Tambah Soal
+                        </button>
+                    </div>
                 </div>
+
+                <form
+                    method="POST"
+                    action="{{ route('admin.exams.questions.import', $exam) }}"
+                    enctype="multipart/form-data"
+                    class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4"
+                >
+                    @csrf
+                    <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Import Soal Excel</label>
+                            <input type="file" name="questions_file" accept=".xlsx,.xls,.csv" class="mt-1 w-full rounded-md border-gray-300 bg-white">
+                            <p class="mt-2 text-xs text-gray-500">Format file mengikuti template yang diunduh. Kolom wajib: sort_order, question_text, option_a_text, option_b_text, correct_answer.</p>
+                        </div>
+                        <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-500">
+                            Import Excel
+                        </button>
+                    </div>
+                </form>
 
                 <form method="POST" action="{{ route('admin.exams.update', $exam) }}" class="mt-6 space-y-4">
                     @csrf
