@@ -375,11 +375,11 @@
                         </div>
                     </main>
 
-                    <aside class="w-full lg:sticky lg:top-4 lg:w-[180px] lg:shrink-0">
+                    <aside class="w-full lg:sticky lg:top-4 lg:w-[140px] lg:shrink-0">
                         <div class="space-y-4">
-                            <div class="rounded-3xl border border-white/10 bg-white/5 p-3 backdrop-blur">
-                                <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Indikator Soal</p>
-                                <div class="mt-3 grid grid-cols-10 gap-1">
+                            <div class="rounded-3xl border border-white/10 bg-white/5 p-2.5 backdrop-blur">
+                                <p class="text-[10px] uppercase tracking-[0.22em] text-slate-400">Indikator Soal</p>
+                                <div class="mt-2.5 grid grid-cols-10 gap-0.5">
                                     @foreach ($questions as $question)
                                         <button
                                             type="button"
@@ -387,24 +387,24 @@
                                             data-question-indicator
                                             data-index="{{ $loop->index }}"
                                             x-bind:data-active="currentQuestionIndex === {{ $loop->index }}"
-                                            class="flex h-7 w-7 items-center justify-center rounded-md border text-[10px] font-semibold transition"
+                                            class="flex h-6 w-6 items-center justify-center rounded-md border text-[9px] font-semibold transition"
                                             x-bind:class="currentQuestionIndex === {{ $loop->index }} ? 'border-sky-300 bg-sky-400/20 text-sky-100' : (answeredQuestions['{{ $question->id }}'] ? 'border-emerald-300 bg-emerald-400/15 text-emerald-100' : 'border-white/10 bg-black/20 text-slate-300 hover:border-sky-300/40 hover:bg-white/10')"
                                         >
                                             {{ $loop->iteration }}
                                         </button>
                                     @endforeach
                                 </div>
-                                <div class="mt-3 space-y-1.5 text-[11px] text-slate-300">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400/70"></span>
+                                <div class="mt-2.5 space-y-1 text-[10px] text-slate-300">
+                                    <div class="flex items-center gap-1">
+                                        <span class="inline-block h-2 w-2 rounded-full bg-emerald-400/70"></span>
                                         <span>Sudah terjawab</span>
                                     </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="inline-block h-2.5 w-2.5 rounded-full bg-white/20"></span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="inline-block h-2 w-2 rounded-full bg-white/20"></span>
                                         <span>Belum terjawab</span>
                                     </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="inline-block h-2.5 w-2.5 rounded-full bg-sky-400/70"></span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="inline-block h-2 w-2 rounded-full bg-sky-400/70"></span>
                                         <span>Soal aktif</span>
                                     </div>
                                 </div>
