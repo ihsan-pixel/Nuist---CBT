@@ -479,8 +479,15 @@ window.examRoom = ({
             }
 
             const payload = await response.json();
-            this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
+            this.answeredQuestions = {
+                ...this.answeredQuestions,
+                [String(payload.question_id)]: Boolean(payload.answer),
+            };
             this.markQuestionSaved(form);
+
+            if (this.currentQuestionIndex < this.questions.length - 1) {
+                this.nextQuestion();
+            }
         } catch (error) {
             console.warn(error);
         }
