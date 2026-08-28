@@ -34,6 +34,8 @@ class ExamRoomSebButtonTest extends TestCase
         $response->assertSee('sebDetected: true', false);
         $response->assertSee('Mulai Ujian', false);
         $response->assertSee('Indikator Soal', false);
+        $response->assertSee('Ringkasan status pengerjaan', false);
+        $response->assertSee('Total 0 soal', false);
         $response->assertSee('Sebelumnya', false);
         $response->assertSee('Selanjutnya', false);
     }
