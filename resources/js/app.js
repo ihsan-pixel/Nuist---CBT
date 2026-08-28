@@ -153,8 +153,9 @@ window.examLock = ({
         this.focusState = document.hidden ? 'TERBLOKIR' : 'AKTIF';
     },
     updateTimerLabel() {
-        const minutes = Math.floor(this.remainingSeconds / 60);
-        const seconds = this.remainingSeconds % 60;
+        const totalSeconds = Math.max(0, Math.floor(Number(this.remainingSeconds ?? 0)));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
         this.timerLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     },
     async raiseWarning(message, type = 'client_warning') {
