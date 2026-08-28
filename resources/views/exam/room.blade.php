@@ -226,6 +226,7 @@
             sebDetected: @js((bool) ($sebDetected ?? false)),
             sebRequired: @js(! empty($sebMode)),
             sebVerified: @js((bool) ($sebVerified ?? false)),
+            hasSubmittedAnswers: @js((bool) ($hasSubmittedAnswers ?? false)),
             handshakeMessage: '',
             answeredQuestions: @js(collect($savedAnswers)->map(fn ($answer) => filled($answer))->all()),
             questions: @js($questions->map(fn ($question) => [
@@ -267,11 +268,16 @@
                         type="button"
                         @click="beginExam()"
                         class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
-                        x-bind:disabled="submitting || (sebRequired && !sebDetected && !sebVerified)"
+                        x-bind:disabled="submitting || hasSubmittedAnswers || (sebRequired && !sebDetected && !sebVerified)"
                     >
                         <span x-show="!submitting" x-cloak>Mulai Ujian</span>
                         <span x-show="submitting" x-cloak>Memulai...</span>
                     </button>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left text-sm text-amber-900" x-show="hasSubmittedAnswers" x-cloak>
+                    <p class="font-semibold">Sesi ujian sudah selesai</p>
+                    <p class="mt-1 leading-6">Anda sudah memiliki jawaban yang tersimpan dari sesi sebelumnya. Mulai ujian tidak dapat dibuka lagi untuk akun ini.</p>
                 </div>
 
                 @if (! empty($sebMode))

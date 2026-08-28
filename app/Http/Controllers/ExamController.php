@@ -32,6 +32,7 @@ class ExamController extends Controller
         $endsAt = $session?->expires_at;
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
+        $hasSubmittedAnswers = (bool) ($session?->finished_at && $session->snapshots()->whereNotNull('selected_answer')->exists());
 
         return view('exam.room', [
             'exam' => $exam,
@@ -49,6 +50,7 @@ class ExamController extends Controller
             'isExpired' => (bool) ($endsAt && now()->greaterThanOrEqualTo($endsAt)),
             'sebDetected' => $sebDetected,
             'sebVerified' => (bool) $request->session()->get('seb.verified'),
+            'hasSubmittedAnswers' => $hasSubmittedAnswers,
         ]);
     }
 
@@ -67,6 +69,7 @@ class ExamController extends Controller
         $endsAt = $session?->expires_at;
         $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
+        $hasSubmittedAnswers = (bool) ($session?->finished_at && $session->snapshots()->whereNotNull('selected_answer')->exists());
 
         return view('exam.room', [
             'exam' => $exam,
@@ -83,6 +86,7 @@ class ExamController extends Controller
             'sebMode' => true,
             'sebDetected' => $sebDetected,
             'sebVerified' => (bool) $request->session()->get('seb.verified'),
+            'hasSubmittedAnswers' => $hasSubmittedAnswers,
         ]);
     }
 
@@ -176,6 +180,12 @@ class ExamController extends Controller
     {
         $exam = Exam::query()->where('is_active', true)->orderBy('id')->firstOrFail();
         $session = $this->currentSession($request, $exam);
+
+        if ($session && $session->finished_at && $session->snapshots()->whereNotNull('selected_answer')->exists()) {
+            return redirect()
+                ->route('exam.completed')
+                ->with('status', 'Sesi ujian sudah selesai dan jawaban Anda telah tersimpan.');
+        }
 
         if ($session && $session->started_at && ! $session->finished_at) {
             return redirect()->route('exam.room')->with('status', 'Sesi ujian sudah berjalan.');
