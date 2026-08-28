@@ -436,7 +436,10 @@
 
                                 <div class="px-4 py-4 sm:px-5">
                                     <div class="pb-1">
-                                        <div class="grid grid-cols-[repeat(30,minmax(0,1fr))] gap-2">
+                                        <div
+                                            class="grid gap-2"
+                                            style="grid-template-columns: repeat(30, minmax(0, 1fr));"
+                                        >
                                             @foreach ($questions as $question)
                                                 <button
                                                     type="button"
