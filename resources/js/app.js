@@ -290,6 +290,215 @@ window.examLock = ({
     },
 });
 
+window.examRoom = ({
+    active = false,
+    submitting = false,
+    sebDetected = false,
+    sebRequired = false,
+    sebVerified = false,
+    handshakeMessage = '',
+    currentQuestionIndex = 0,
+    answeredQuestions = {},
+    questions = [],
+    remainingSeconds = 0,
+    violationUrl = null,
+    answerUrl = null,
+    refreshUrl = null,
+} = {}) => ({
+    active,
+    submitting,
+    sebDetected,
+    sebRequired,
+    sebVerified,
+    handshakeMessage,
+    currentQuestionIndex,
+    answeredQuestions,
+    questions,
+    remainingSeconds: Number(remainingSeconds ?? 0),
+    violationUrl,
+    answerUrl,
+    refreshUrl,
+    timerLabel: '--:--',
+    timerHandle: null,
+    init() {
+        const sebApiDetected = Boolean(window.SafeExamBrowser?.version || window.SafeExamBrowser?.security);
+        this.sebDetected = this.sebDetected || sebApiDetected;
+
+        if (this.sebRequired && this.sebDetected) {
+            this.verifySeb().then(() => {
+                if (this.sebVerified && !this.active) {
+                    this.beginExam();
+                }
+            });
+        }
+
+        const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
+        this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
+        this.updateTimerLabel();
+
+        if (this.active && this.remainingSeconds > 0) {
+            this.timerHandle = window.setInterval(() => {
+                this.remainingSeconds = Math.max(0, this.remainingSeconds - 1);
+                this.updateTimerLabel();
+            }, 1000);
+        }
+    },
+    async verifySeb() {
+        if (!window.SafeExamBrowser?.security) {
+            this.handshakeMessage = 'SEB JS API belum tersedia.';
+            return;
+        }
+
+        try {
+            if (typeof window.SafeExamBrowser.security.updateKeys === 'function') {
+                await new Promise((resolve) => {
+                    window.SafeExamBrowser.security.updateKeys(() => resolve());
+                });
+            }
+
+            const browserExamKey = window.SafeExamBrowser.security.browserExamKey ?? '';
+            const configKey = window.SafeExamBrowser.security.configKey ?? '';
+
+            if (!browserExamKey || !configKey) {
+                this.handshakeMessage = 'Key SEB belum tersedia.';
+                return;
+            }
+
+            const response = await fetch('/exam/seb-handshake', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    browser_exam_key: browserExamKey,
+                    config_key: configKey,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('SEB handshake failed');
+            }
+
+            this.sebVerified = true;
+            this.handshakeMessage = 'SEB terverifikasi.';
+        } catch (error) {
+            this.sebVerified = false;
+            this.handshakeMessage = 'Verifikasi SEB gagal.';
+        }
+    },
+    async beginExam() {
+        if (this.submitting || this.active) {
+            return;
+        }
+
+        if (this.sebRequired && !this.sebDetected && !this.sebVerified) {
+            alert('Mode Safe Exam Browser wajib dibuka lewat aplikasi SEB, bukan browser biasa.');
+            return;
+        }
+
+        this.submitting = true;
+
+        try {
+            const response = await fetch('/exam/start', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    'Accept': 'application/json',
+                },
+            });
+
+            if (!response.ok && response.status !== 302) {
+                throw new Error('Failed to start exam');
+            }
+
+            this.active = true;
+        } catch (error) {
+            console.warn(error);
+            this.submitting = false;
+        }
+    },
+    setCurrentQuestion(index) {
+        if (index < 0 || index >= this.questions.length) {
+            return;
+        }
+
+        this.currentQuestionIndex = index;
+        this.scrollToCurrentQuestion();
+        this.updateIndicatorState();
+    },
+    nextQuestion() {
+        if (this.currentQuestionIndex < this.questions.length - 1) {
+            this.currentQuestionIndex += 1;
+            this.scrollToCurrentQuestion();
+            this.updateIndicatorState();
+        }
+    },
+    previousQuestion() {
+        if (this.currentQuestionIndex > 0) {
+            this.currentQuestionIndex -= 1;
+            this.scrollToCurrentQuestion();
+            this.updateIndicatorState();
+        }
+    },
+    scrollToCurrentQuestion() {
+        this.$nextTick(() => {
+            const currentCard = this.$root.querySelector(`[data-question-card="${this.questions[this.currentQuestionIndex]?.id}"]`);
+            currentCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    },
+    updateIndicatorState() {
+        this.$nextTick(() => {
+            this.$root.querySelectorAll('[data-question-indicator]').forEach((button) => {
+                button.dataset.active = button.dataset.index === String(this.currentQuestionIndex);
+            });
+        });
+    },
+    async saveCurrentAnswer(form) {
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(this.answerUrl || '/exam/answer', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                form.submit();
+                return;
+            }
+
+            const payload = await response.json();
+            this.answeredQuestions[String(payload.question_id)] = Boolean(payload.answer);
+            this.markQuestionSaved(form);
+        } catch (error) {
+            form.submit();
+        }
+    },
+    markQuestionSaved(form) {
+        const card = form.closest('article');
+        if (!card) {
+            return;
+        }
+
+        const badge = card.querySelector('[data-answer-status]');
+        if (badge) {
+            badge.textContent = 'Tersimpan';
+            badge.className = 'rounded-full px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-800';
+        }
+    },
+    updateTimerLabel() {
+        const minutes = Math.floor(this.remainingSeconds / 60);
+        const seconds = this.remainingSeconds % 60;
+        this.timerLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    },
+});
+
 window.examEditor = (initial = {}) => ({
     form: {
         title: initial.title ?? '',

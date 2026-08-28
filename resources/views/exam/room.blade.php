@@ -1,13 +1,11 @@
 <x-exam-layout>
     <div
-        x-data="{
+        x-data="window.examRoom({
             active: @js($hasStarted),
-            submitting: false,
             sebDetected: @js((bool) ($sebDetected ?? false)),
             sebRequired: @js(! empty($sebMode)),
             sebVerified: @js((bool) ($sebVerified ?? false)),
             handshakeMessage: '',
-            currentQuestionIndex: 0,
             answeredQuestions: @js(collect($savedAnswers)->map(fn ($answer) => filled($answer))->all()),
             questions: @js($questions->map(fn ($question) => [
                 'id' => $question->id,
@@ -18,162 +16,12 @@
                     'option_text' => $option->option_text,
                 ])->values(),
             ])->values()),
-            init() {
-                const sebApiDetected = Boolean(window.SafeExamBrowser?.version || window.SafeExamBrowser?.security);
-                this.sebDetected = this.sebDetected || sebApiDetected;
-
-                if (this.sebRequired && this.sebDetected) {
-                    this.verifySeb().then(() => {
-                        if (this.sebVerified && !this.active) {
-                            this.beginExam();
-                        }
-                    });
-                }
-
-                const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
-                this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
-            },
-            async verifySeb() {
-                if (!window.SafeExamBrowser?.security) {
-                    this.handshakeMessage = 'SEB JS API belum tersedia.';
-                    return;
-                }
-
-                try {
-                    if (typeof window.SafeExamBrowser.security.updateKeys === 'function') {
-                        await new Promise((resolve) => {
-                            window.SafeExamBrowser.security.updateKeys(() => resolve());
-                        });
-                    }
-
-                    const browserExamKey = window.SafeExamBrowser.security.browserExamKey ?? '';
-                    const configKey = window.SafeExamBrowser.security.configKey ?? '';
-
-                    if (!browserExamKey || !configKey) {
-                        this.handshakeMessage = 'Key SEB belum tersedia.';
-                        return;
-                    }
-
-                    const response = await fetch(@js(route('exam.seb-handshake')), {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name=&quot;csrf-token&quot;]')?.content ?? '',
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            browser_exam_key: browserExamKey,
-                            config_key: configKey,
-                        }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('SEB handshake failed');
-                    }
-
-                    this.sebVerified = true;
-                    this.handshakeMessage = 'SEB terverifikasi.';
-                } catch (error) {
-                    this.sebVerified = false;
-                    this.handshakeMessage = 'Verifikasi SEB gagal.';
-                }
-            },
-            async beginExam() {
-                if (this.submitting || this.active) {
-                    return;
-                }
-
-                if (this.sebRequired && !this.sebDetected && !this.sebVerified) {
-                    alert('Mode Safe Exam Browser wajib dibuka lewat aplikasi SEB, bukan browser biasa.');
-                    return;
-                }
-
-                this.submitting = true;
-
-                const requestFullscreen = async () => {
-                    const target = document.documentElement;
-
-                    try {
-                        if (target.requestFullscreen) {
-                            await target.requestFullscreen({ navigationUI: 'hide' });
-                            return true;
-                        }
-
-                        if (target.webkitRequestFullscreen) {
-                            target.webkitRequestFullscreen();
-                            return true;
-                        }
-                    } catch (error) {
-                        console.warn(error);
-                    }
-
-                    return false;
-                };
-
-                if (!this.sebRequired) {
-                    await requestFullscreen();
-                }
-
-                try {
-                    const response = await fetch(@js(route('exam.start')), {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name=&quot;csrf-token&quot;]')?.content ?? '',
-                            'Accept': 'application/json',
-                        },
-                    });
-
-                    if (!response.ok && response.status !== 302) {
-                        throw new Error('Failed to start exam');
-                    }
-
-                    this.active = true;
-                } catch (error) {
-                    console.warn(error);
-                    this.submitting = false;
-                }
-            },
-            setCurrentQuestion(index) {
-                if (index < 0 || index >= this.questions.length) {
-                    return;
-                }
-
-                this.currentQuestionIndex = index;
-                this.scrollToCurrentQuestion();
-                this.updateIndicatorState();
-            },
-            nextQuestion() {
-                if (this.currentQuestionIndex < this.questions.length - 1) {
-                    this.currentQuestionIndex += 1;
-                    this.scrollToCurrentQuestion();
-                    this.updateIndicatorState();
-                }
-            },
-            previousQuestion() {
-                if (this.currentQuestionIndex > 0) {
-                    this.currentQuestionIndex -= 1;
-                    this.scrollToCurrentQuestion();
-                    this.updateIndicatorState();
-                }
-            },
-            scrollToCurrentQuestion() {
-                this.$nextTick(() => {
-                    const currentCard = this.$root.querySelector(`[data-question-card="${this.questions[this.currentQuestionIndex]?.id}"]`);
-
-                    currentCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            },
-            updateIndicatorState() {
-                this.$nextTick(() => {
-                    this.$root.querySelectorAll('[data-question-indicator]').forEach((button) => {
-                        button.dataset.active = button.dataset.index === String(this.currentQuestionIndex);
-                    });
-                });
-            },
-            markAnswered(questionId, answer) {
-                this.answeredQuestions[String(questionId)] = Boolean(answer);
-            },
-        }"
+            remainingSeconds: @js($remainingSeconds ?? 0),
+            violationUrl: @js(route('exam.violation')),
+            answerUrl: @js(route('exam.answer')),
+            refreshUrl: @js(route('exam.refresh-session')),
+        })"
+        x-init="init()"
     >
         <main x-show="!active" class="flex min-h-screen items-center justify-center px-4 py-10">
             <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
@@ -228,7 +76,7 @@
         <template x-if="active">
             <div
                 class="min-h-screen bg-slate-950 text-white"
-                x-data="examLock({
+                x-data="window.examLock({
                     started: true,
                     remainingSeconds: @js($remainingSeconds ?? 0),
                     violationUrl: @js(route('exam.violation')),
@@ -296,7 +144,7 @@
                                             </span>
                                         </div>
 
-                                        <form method="POST" action="{{ route('exam.answer') }}" class="mt-6 space-y-4" data-autosave-form @submit.prevent="saveAnswer($event.currentTarget)">
+                                        <form method="POST" action="{{ route('exam.answer') }}" class="mt-6 space-y-4" data-autosave-form @submit.prevent="saveCurrentAnswer($event.currentTarget)">
                                             @csrf
                                             <input type="hidden" name="question_id" value="{{ $question->id }}">
                                             <div class="grid gap-2">
