@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col gap-2">
-            <p class="text-sm font-medium uppercase tracking-[0.25em] text-gray-500">Ringkasan Akun</p>
+            {{-- <p class="text-sm font-medium uppercase tracking-[0.25em] text-gray-500">Ringkasan Akun</p> --}}
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 {{ __('Dashboard') }}
             </h2>
