@@ -19,7 +19,7 @@
                 <p class="text-sm text-gray-500">{{ $exam->description }}</p>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-3">
+            {{-- <div class="grid gap-4 sm:grid-cols-3">
                 <div class="rounded-lg bg-white p-6 shadow-sm">
                     <p class="text-xs uppercase tracking-[0.25em] text-gray-500">Total Soal</p>
                     <p class="mt-3 text-3xl font-bold text-gray-900">{{ $exam->questions->count() }}</p>
@@ -36,7 +36,7 @@
                         {{ $sessions->sum('unanswered') }}
                     </p>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="overflow-hidden rounded-lg bg-white shadow-sm">
                 <table class="min-w-full divide-y divide-gray-200">
