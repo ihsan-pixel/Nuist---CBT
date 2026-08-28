@@ -285,7 +285,7 @@
                 </form>
 
                 <div class="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_240px] lg:px-8">
-                    <main class="flex min-w-0 flex-col gap-6">
+                    <main class="flex min-w-0 flex-col gap-6 lg:col-start-1 lg:col-end-2">
                         <div class="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div class="min-w-0">
@@ -375,7 +375,7 @@
                         </div>
                     </main>
 
-                    <aside class="lg:sticky lg:top-4">
+                    <aside class="lg:col-start-2 lg:col-end-3 lg:sticky lg:top-4">
                         <div class="space-y-4">
                             <div class="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                                 <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Indikator Soal</p>
