@@ -19,7 +19,7 @@
             <div class="relative mt-1">
                 <input
                     id="password"
-                    class="block w-full pr-12"
+                    class="block w-full rounded-md border-gray-300 px-4 py-2.5 pr-12 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     x-bind:type="showPassword ? 'text' : 'password'"
                     name="password"
                     required
