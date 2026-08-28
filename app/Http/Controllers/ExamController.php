@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\ExamQuestion;
 use App\Models\ExamSession;
 use App\Models\ExamViolation;
 use App\Models\SebAuditLog;
@@ -225,25 +226,6 @@ class ExamController extends Controller
                     'is_locked' => true,
                 ]
             );
-
-            $session->snapshots()->delete();
-
-            foreach ($exam->questions()->with('options')->orderBy('sort_order')->get() as $question) {
-                $session->snapshots()->create([
-                    'exam_question_id' => $question->id,
-                    'sort_order' => $question->sort_order,
-                    'question_text' => $question->question_text,
-                    'option_snapshot' => $question->options
-                        ->sortBy('option_label')
-                        ->values()
-                        ->map(fn ($option) => [
-                            'option_label' => $option->option_label,
-                            'option_text' => $option->option_text,
-                        ])
-                        ->all(),
-                    'selected_answer' => null,
-                ]);
-            }
         });
 
         $request->session()->put('exam.active', true);
@@ -265,7 +247,28 @@ class ExamController extends Controller
 
         abort_unless($session && $session->is_locked && ! $session->finished_at, 403, 'Sesi ujian tidak aktif.');
 
-        $snapshot = $session->snapshots()->where('exam_question_id', $data['question_id'])->firstOrFail();
+        $question = ExamQuestion::query()
+            ->with('options')
+            ->where('exam_id', $exam->id)
+            ->where('id', $data['question_id'])
+            ->firstOrFail();
+
+        $snapshot = $session->snapshots()->firstOrCreate(
+            ['exam_question_id' => $question->id],
+            [
+                'sort_order' => $question->sort_order,
+                'question_text' => $question->question_text,
+                'option_snapshot' => $question->options
+                    ->sortBy('option_label')
+                    ->values()
+                    ->map(fn ($option) => [
+                        'option_label' => $option->option_label,
+                        'option_text' => $option->option_text,
+                    ])
+                    ->all(),
+                'selected_answer' => null,
+            ]
+        );
         $snapshot->forceFill(['selected_answer' => $data['answer']])->save();
         $request->session()->put('exam.resume_question_id', $data['question_id']);
 
