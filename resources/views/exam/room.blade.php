@@ -130,8 +130,8 @@
             </div>
         @endif
 
-        <main x-show="!active" class="flex min-h-screen items-center justify-center px-4 py-10">
-            <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
+                <main x-show="!active" class="flex min-h-screen items-center justify-center px-4 py-10">
+                    <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
                 <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-300">Ruang Ujian</p>
                 <h1 class="mt-4 text-3xl font-bold text-white sm:text-4xl">{{ $exam->title }}</h1>
                 <p class="mt-3 text-sm leading-6 text-slate-300">{{ $exam->description }}</p>
@@ -147,15 +147,14 @@
                     </div>
                 </div>
 
-                    <div class="mt-8">
-                        <button
-                            type="button"
-                            @click="beginExam()"
-                            x-show="!sebRequired || sebDetected"
-                            class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-60"
-                        :disabled="submitting"
+                <div class="mt-8">
+                    <button
+                        type="button"
+                        @click="beginExam()"
+                        class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-60"
+                        :disabled="submitting || (sebRequired && !sebDetected)"
                     >
-                        <span x-show="!submitting">Mulai Ujian</span>
+                        <span x-show="!submitting" x-cloak>Mulai Ujian</span>
                         <span x-show="submitting" x-cloak>Memulai...</span>
                     </button>
                 </div>
@@ -163,7 +162,7 @@
                 @if (! empty($sebMode))
                     <div class="mt-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-left text-sm text-amber-50" x-show="!sebDetected" x-cloak>
                         <p class="font-semibold">Safe Exam Browser belum terdeteksi</p>
-                        <p class="mt-1 leading-6">Tutup browser ini, lalu buka kembali ujian melalui aplikasi Safe Exam Browser.</p>
+                        <p class="mt-1 leading-6">Tutup browser ini, lalu buka kembali ujian melalui aplikasi Safe Exam Browser. Jika ingin keluar dari SEB, gunakan Ctrl+Q atau tombol quit yang diizinkan oleh konfigurasi SEB.</p>
                     </div>
                     <div class="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-left text-sm text-emerald-50" x-show="sebDetected" x-cloak>
                         <p class="font-semibold">SEB terdeteksi</p>
@@ -172,6 +171,10 @@
                     <div class="mt-4 rounded-2xl border border-slate-300 bg-slate-50 p-4 text-left text-sm text-slate-700" x-show="sebDetected" x-cloak>
                         <p class="font-semibold">Status verifikasi</p>
                         <p class="mt-1 leading-6" x-text="handshakeMessage || (sebVerified ? 'SEB terverifikasi.' : 'Menunggu verifikasi SEB...')"></p>
+                    </div>
+                    <div class="mt-4 rounded-2xl border border-slate-300 bg-slate-50 p-4 text-left text-sm text-slate-700" x-show="sebRequired && !sebDetected" x-cloak>
+                        <p class="font-semibold">Tombol mulai belum aktif</p>
+                        <p class="mt-1 leading-6">Pastikan halaman ini dibuka dari aplikasi SEB. Saat SEB sudah terdeteksi, tombol mulai ujian akan aktif otomatis.</p>
                     </div>
                 @endif
             </div>

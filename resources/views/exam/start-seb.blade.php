@@ -37,6 +37,7 @@
                             <li>Unduh konfigurasi SEB lalu buka file tersebut dengan aplikasi Safe Exam Browser.</li>
                             <li>Pastikan aplikasi SEB menampilkan halaman ini, bukan browser biasa.</li>
                             <li>Setelah masuk ke ruang SEB, sistem akan memverifikasi browser dan menyiapkan sesi ujian.</li>
+                            <li>Jika perlu keluar dari SEB, gunakan shortcut <span class="font-semibold">Ctrl+Q</span> atau tombol quit yang disediakan SEB.</li>
                         </ol>
                     </div>
                 </section>

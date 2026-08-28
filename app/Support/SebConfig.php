@@ -13,7 +13,7 @@ class SebConfig
     {
         return [
             'startURL' => self::startUrl(),
-            'allowQuit' => false,
+            'allowQuit' => true,
             'allowReloadInExam' => false,
             'showReloadButton' => false,
             'showTaskBar' => false,
@@ -25,9 +25,9 @@ class SebConfig
             'showMenuBar' => false,
             'allowSpellCheck' => false,
             'allowPreferences' => false,
-            'allowQuitApp' => false,
+            'allowQuitApp' => true,
             'allowQuitAfterExam' => false,
-            'mainWindowEnableClose' => false,
+            'mainWindowEnableClose' => true,
             'mainWindowFullScreen' => true,
             'browserWindowWebViewMode' => 3,
             'sendBrowserExamKey' => true,
