@@ -30,8 +30,7 @@
                         });
                     }
 
-                    const firstUnansweredIndex = this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
-                    this.currentQuestionIndex = firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0;
+                    this.currentQuestionIndex = 0;
                     this.updateTimerLabel();
                 },
                 async verifySeb() {
@@ -146,9 +145,6 @@
                         });
                     });
                 },
-                getFirstUnansweredQuestionIndex() {
-                    return this.questions.findIndex((question) => !this.answeredQuestions[String(question.id)]);
-                },
                 allQuestionsAnswered() {
                     return this.questions.length > 0 && this.answeredCount() === this.questions.length;
                 },
@@ -181,10 +177,7 @@
                     }
                 },
                 async submitExam() {
-                    const firstUnansweredIndex = this.getFirstUnansweredQuestionIndex();
-
-                    if (firstUnansweredIndex !== -1) {
-                        this.setCurrentQuestion(firstUnansweredIndex);
+                    if (!this.allQuestionsAnswered()) {
                         return;
                     }
 
