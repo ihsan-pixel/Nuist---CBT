@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Exam;
+use App\Models\ExamSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +31,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if ($this->shouldRedirectToExamCompleted($request)) {
+            return redirect()->intended(route('exam.completed', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -43,5 +50,27 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    private function shouldRedirectToExamCompleted(Request $request): bool
+    {
+        $user = $request->user();
+
+        if (! $user || $user->role !== UserRole::Peserta) {
+            return false;
+        }
+
+        $exam = Exam::query()->where('is_active', true)->first();
+
+        if (! $exam) {
+            return false;
+        }
+
+        return ExamSession::query()
+            ->where('user_id', $user->id)
+            ->where('exam_id', $exam->id)
+            ->whereNotNull('finished_at')
+            ->whereHas('snapshots', fn ($query) => $query->whereNotNull('selected_answer'))
+            ->exists();
     }
 }
