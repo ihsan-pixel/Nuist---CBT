@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Enums\UserRole;
 use App\Models\AppSetting;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -33,9 +34,13 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         View::composer('*', function ($view): void {
-            $settings = Schema::hasTable('app_settings')
-                ? AppSetting::query()->first() ?? new AppSetting
-                : new AppSetting;
+            $settings = Cache::remember('app-settings.current', now()->addMinutes(5), function (): AppSetting {
+                if (! Schema::hasTable('app_settings')) {
+                    return new AppSetting;
+                }
+
+                return AppSetting::query()->first() ?? new AppSetting;
+            });
 
             $view->with('appSettings', $settings);
         });
