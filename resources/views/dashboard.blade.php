@@ -35,7 +35,7 @@
                         <p>Sesi terakhir: <span class="font-semibold text-slate-900">{{ $latestSession?->started_at?->format('d M Y H:i') ?? '-' }}</span></p>
                         <p>Status sesi: <span class="font-semibold text-slate-900">{{ $latestSession?->finished_at ? 'Selesai' : ($latestSession?->started_at ? 'Berjalan' : 'Belum mulai') }}</span></p>
                     </div>
-                    <a href="{{ route('exam.room') }}" class="mt-5 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
+                    {{-- <a href="{{ route('exam.room') }}" class="mt-5 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
                         Masuk Ruang Ujian
                     </a>
                     <a href="{{ route('exam.start-seb') }}" class="mt-3 inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">
@@ -43,7 +43,7 @@
                     </a>
                     <a href="{{ route('exam.seb-config') }}" class="mt-3 inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                         Unduh Konfigurasi SEB
-                    </a>
+                    </a> --}}
                 </div>
 
                 <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -54,9 +54,9 @@
                         <p>Audit gagal terakhir: <span class="font-semibold text-slate-900">{{ $sebLatestFailure?->created_at?->format('d M Y H:i') ?? '-' }}</span></p>
                         <p class="text-xs text-slate-500">{{ $sebLatestFailure?->message ?? 'Belum ada audit gagal.' }}</p>
                     </div>
-                    <a href="{{ route('exam.start-seb') }}" class="mt-5 inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">
+                    {{-- <a href="{{ route('exam.start-seb') }}" class="mt-5 inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">
                         Buka Start SEB
-                    </a>
+                    </a> --}}
                 </div>
             </section>
 
