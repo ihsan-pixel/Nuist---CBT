@@ -376,7 +376,7 @@
                         </div>
 
                         <aside class="w-full">
-                            <div class="rounded-3xl border border-white/10 bg-white/5 p-2.5 backdrop-blur lg:sticky lg:top-4">
+                            <div class="rounded-3xl border border-white/10 bg-white/5 p-2.5 backdrop-blur">
                                 <p class="text-[10px] uppercase tracking-[0.22em] text-slate-400">Indikator Soal</p>
                                 <div class="mt-2.5 grid grid-cols-10 gap-0.5">
                                     @foreach ($questions as $question)
