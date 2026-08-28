@@ -473,10 +473,6 @@
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-slate-300"></span>
                                             <span>Belum terjawab: {{ $unansweredCount }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="inline-block h-2.5 w-2.5 rounded-full bg-sky-500"></span>
-                                            <span>Soal aktif {{ $totalQuestions }}</span>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
