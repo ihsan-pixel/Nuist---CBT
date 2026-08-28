@@ -12,6 +12,7 @@
                 answeredQuestions: config.answeredQuestions || {},
                 questions: config.questions || [],
                 remainingSeconds: Number(config.remainingSeconds ?? 0),
+                endsAt: config.endsAt || null,
                 violationUrl: config.violationUrl || null,
                 answerUrl: config.answerUrl || null,
                 refreshUrl: config.refreshUrl || null,
@@ -33,6 +34,30 @@
                     this.currentQuestionIndex = Number.isInteger(config.initialQuestionIndex)
                         ? config.initialQuestionIndex
                         : 0;
+                    this.syncTimerFromEndsAt();
+                    this.updateTimerLabel();
+
+                    if (this.started && this.endsAt) {
+                        this.timerHandle = window.setInterval(() => {
+                            this.syncTimerFromEndsAt();
+                            if (this.remainingSeconds === 0) {
+                                this.autoFinish();
+                            }
+                        }, 1000);
+                    }
+                },
+                syncTimerFromEndsAt() {
+                    if (!this.endsAt) {
+                        return;
+                    }
+
+                    const endTime = Date.parse(this.endsAt);
+
+                    if (Number.isNaN(endTime)) {
+                        return;
+                    }
+
+                    this.remainingSeconds = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
                     this.updateTimerLabel();
                 },
                 async verifySeb() {
@@ -237,6 +262,7 @@
             handshakeMessage: '',
             answeredQuestions: @js(collect($savedAnswers)->map(fn ($answer) => filled($answer))->all()),
             initialQuestionIndex: @js($initialQuestionIndex ?? 0),
+            endsAt: @js(optional($endsAt)->toIso8601String()),
             questions: @js($questions->map(fn ($question) => [
                 'id' => $question->id,
                 'sort_order' => $question->sort_order,
