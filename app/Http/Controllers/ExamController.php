@@ -30,6 +30,7 @@ class ExamController extends Controller
         $session = $this->currentSession($request, $exam);
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
+        $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
 
         return view('exam.room', [
@@ -40,7 +41,7 @@ class ExamController extends Controller
             'questions' => $exam->questions->sortBy('sort_order')->values(),
             'startedAt' => $startedAt,
             'endsAt' => $endsAt,
-            'remainingSeconds' => $endsAt ? max(0, now()->diffInSeconds($endsAt, false)) : null,
+            'remainingSeconds' => $remainingSeconds,
             'warningCount' => $session?->warning_count ?? 0,
             'savedAnswers' => $session
                 ? $session->snapshots()->pluck('selected_answer', 'exam_question_id')->all()
@@ -64,6 +65,7 @@ class ExamController extends Controller
         $session = $this->currentSession($request, $exam);
         $startedAt = $session?->started_at;
         $endsAt = $session?->expires_at;
+        $remainingSeconds = $endsAt ? (int) max(0, round(now()->diffInSeconds($endsAt, false))) : null;
         $sebDetected = (bool) ($request->header('X-SafeExamBrowser-ConfigKeyHash') || $request->session()->get('seb.verified'));
 
         return view('exam.room', [
@@ -73,7 +75,7 @@ class ExamController extends Controller
             'questions' => $exam->questions->sortBy('sort_order')->values(),
             'startedAt' => $startedAt,
             'endsAt' => $endsAt,
-            'remainingSeconds' => $endsAt ? max(0, now()->diffInSeconds($endsAt, false)) : null,
+            'remainingSeconds' => $remainingSeconds,
             'warningCount' => $session?->warning_count ?? 0,
             'savedAnswers' => $session
                 ? $session->snapshots()->pluck('selected_answer', 'exam_question_id')->all()
