@@ -420,14 +420,14 @@
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
                                             <p class="text-[10px] uppercase tracking-[0.28em] text-slate-500">Indikator Soal</p>
-                                            <h3 class="mt-1 text-sm font-semibold text-slate-900">Ringkasan status pengerjaan</h3>
+                                            {{-- <h3 class="mt-1 text-sm font-semibold text-slate-900">Ringkasan status pengerjaan</h3> --}}
                                         </div>
                                         <div class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
                                             Total {{ $totalQuestions }} soal
                                         </div>
                                     </div>
 
-                                    <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                    {{-- <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                                         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
                                             <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500">Terjawab</div>
                                             <div class="mt-1 text-2xl font-bold text-emerald-700">{{ $answeredCount }}</div>
@@ -444,7 +444,7 @@
                                             <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500">Total</div>
                                             <div class="mt-1 text-2xl font-bold text-slate-900">{{ $totalQuestions }}</div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
 
                                 <div class="px-4 py-4 sm:px-5">
@@ -467,15 +467,15 @@
                                     <div class="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
                                         <div class="flex items-center gap-1.5">
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                                            <span>Sudah terjawab</span>
+                                            <span>Sudah terjawab: {{ $answeredCount }}</span>
                                         </div>
                                         <div class="flex items-center gap-1.5">
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-slate-300"></span>
-                                            <span>Belum terjawab</span>
+                                            <span>Belum terjawab: {{ $unansweredCount }}</span>
                                         </div>
                                         <div class="flex items-center gap-1.5">
                                             <span class="inline-block h-2.5 w-2.5 rounded-full bg-sky-500"></span>
-                                            <span>Soal aktif</span>
+                                            <span>Soal aktif {{ $totalQuestions }}</span>
                                         </div>
                                     </div>
                                 </div>
