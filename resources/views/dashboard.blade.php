@@ -23,7 +23,7 @@
                         <h3 class="text-2xl font-bold text-slate-900">{{ $user->name }}</h3>
                         <p class="text-sm text-slate-600">Kode peserta: <span class="font-semibold text-slate-900">{{ $user->participant_code ?? '-' }}</span></p>
                         <p class="text-sm text-slate-600">Email: <span class="font-semibold text-slate-900">{{ $user->email }}</span></p>
-                        <p class="text-sm text-slate-600">Role: <span class="font-semibold text-slate-900">{{ $user->role?->value ?? $user->role }}</span></p>
+                        <p class="text-sm text-slate-600">Role : <span class="font-semibold text-slate-900">{{ $user->role?->value ?? $user->role }}</span></p>
                     </div>
                 </div>
 
