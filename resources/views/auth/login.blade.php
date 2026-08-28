@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-4 text-center">
         <h1 class="text-2xl font-semibold text-gray-900">Selamat Datang</h1>
-        <p class="mt-2 text-sm text-gray-600">Silakan masuk menggunakan akun yang telah diberikan.</p>
+        <p class="mt-2 text-sm text-gray-600">Silakan masuk di Sistem CBT Nuist LPMNU DIY.</p>
     </div>
 
     <form method="POST" action="{{ route('login') }}" x-data="{ showPassword: false, submitting: false }" @submit="submitting = true">
