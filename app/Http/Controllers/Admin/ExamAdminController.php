@@ -9,8 +9,10 @@ use App\Models\Exam;
 use App\Models\ExamOption;
 use App\Models\ExamQuestion;
 use App\Models\ExamSession;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -202,44 +204,38 @@ class ExamAdminController extends Controller
 
     public function results(Exam $exam): View
     {
-        $exam->load('questions.options');
-
-        $sessions = ExamSession::query()
-            ->where('exam_id', $exam->id)
-            ->with('user')
-            ->latest('finished_at')
-            ->get()
-            ->map(function (ExamSession $session) use ($exam) {
-                $total = $exam->questions->count();
-                $correct = 0;
-                $answered = 0;
-
-                foreach ($exam->questions as $question) {
-                    $selected = data_get($session->answers, (string) $question->id);
-                    $correctOption = $question->options->firstWhere('is_correct', true);
-
-                    if (filled($selected)) {
-                        $answered++;
-                    }
-
-                    if ($correctOption && $selected === $correctOption->option_label) {
-                        $correct++;
-                    }
-                }
-
-                return [
-                    'session' => $session,
-                    'score' => $total > 0 ? round(($correct / $total) * 100, 2) : 0,
-                    'correct' => $correct,
-                    'answered' => $answered,
-                    'unanswered' => max(0, $total - $answered),
-                    'total' => $total,
-                ];
-            });
+        $sessions = $this->buildExamResults($exam);
 
         return view('admin.exams.results', [
             'exam' => $exam,
             'sessions' => $sessions,
+        ]);
+    }
+
+    public function resultsData(Exam $exam): JsonResponse
+    {
+        $results = $this->buildExamResults($exam);
+
+        return response()->json([
+            'sessions' => $results->map(function (array $row): array {
+                return [
+                    'id' => $row['session']->id,
+                    'user_name' => $row['session']->user->name,
+                    'score' => $row['score'],
+                    'answered' => $row['answered'],
+                    'unanswered' => $row['unanswered'],
+                    'correct' => $row['correct'],
+                    'total' => $row['total'],
+                    'finished_at' => optional($row['session']->finished_at)->format('d M Y H:i'),
+                    'status' => $row['is_locked_by_violation'] ? 'Ditutup otomatis' : ($row['session']->is_locked ? 'Berjalan' : 'Selesai'),
+                    'detail_url' => route('admin.sessions.show', $row['session']),
+                ];
+            })->values(),
+            'summary' => [
+                'total_questions' => $results->first()['total'] ?? $exam->questions->count(),
+                'answered' => $results->sum('answered'),
+                'unanswered' => $results->sum('unanswered'),
+            ],
         ]);
     }
 
@@ -373,5 +369,47 @@ class ExamAdminController extends Controller
             'exam' => $exam,
             'details' => $details,
         ]);
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function buildExamResults(Exam $exam)
+    {
+        $exam->loadMissing('questions.options');
+
+        return ExamSession::query()
+            ->where('exam_id', $exam->id)
+            ->with('user')
+            ->latest('finished_at')
+            ->get()
+            ->map(function (ExamSession $session) use ($exam) {
+                $total = $exam->questions->count();
+                $correct = 0;
+                $answered = 0;
+
+                foreach ($exam->questions as $question) {
+                    $selected = data_get($session->answers, (string) $question->id);
+                    $correctOption = $question->options->firstWhere('is_correct', true);
+
+                    if (filled($selected)) {
+                        $answered++;
+                    }
+
+                    if ($correctOption && $selected === $correctOption->option_label) {
+                        $correct++;
+                    }
+                }
+
+                return [
+                    'session' => $session,
+                    'score' => $total > 0 ? round(($correct / $total) * 100, 2) : 0,
+                    'correct' => $correct,
+                    'answered' => $answered,
+                    'unanswered' => max(0, $total - $answered),
+                    'total' => $total,
+                    'is_locked_by_violation' => $session->warning_count >= 3,
+                ];
+            });
     }
 }

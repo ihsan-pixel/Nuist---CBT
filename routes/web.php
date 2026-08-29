@@ -70,6 +70,7 @@ Route::middleware(['auth', 'can:access-exam-panel', 'exam.lock', 'exam.headers']
     Route::post('/questions/{question}/options', [ExamAdminController::class, 'storeOption'])->name('questions.options.store');
     Route::delete('/options/{option}', [ExamAdminController::class, 'destroyOption'])->name('options.destroy');
     Route::get('/exams/{exam}/results', [ExamAdminController::class, 'results'])->name('exams.results');
+    Route::get('/exams/{exam}/results/data', [ExamAdminController::class, 'resultsData'])->name('exams.results.data');
     Route::get('/exams/{exam}/results/export', [ExamAdminController::class, 'exportResults'])->name('exams.results.export');
     Route::get('/sessions/{session}', [ExamAdminController::class, 'sessionDetail'])->name('sessions.show');
     Route::get('/sessions/{session}/export', [ExamAdminController::class, 'exportSession'])->name('sessions.export');
